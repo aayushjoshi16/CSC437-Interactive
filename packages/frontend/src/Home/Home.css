@@ -1,0 +1,84 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+/* Nav bar */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #30ddff;
+    padding: 0.5rem 1.5rem 0.5rem 1.5rem;
+    max-height: 3rem;
+}
+
+h1 {
+    font-size: 2rem;
+}
+
+.profile-pic {
+    border: 5px solid rgb(60, 60, 60);
+    border-radius: 50%;
+    height: 2.5rem;
+    width: 2.5rem;
+    padding: 0.2rem;
+}
+
+/* Main content */
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 60%;
+    margin: 2rem auto;
+    min-width: 30rem;
+}
+
+/* Search bar */
+form {
+    border-radius: 5px;
+    display: flex;
+    flex-direction: row;
+    width: 80vh;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    min-width: 20rem;
+}
+
+input {
+    width: 100%;
+    border-radius: 15px;
+    border: 1px solid #ccc;
+    padding: 1rem;
+}
+
+.search-pic {
+    border-radius: 15px;
+    height: 1.5rem;
+    width: 1.5rem;
+    padding: 0.5rem;
+}
+
+/* Posts */
+.post-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.post {
+    border: 5px solid #3083ff;
+    border-radius: 15px;
+    padding: 1rem;
+    width: 60vh;
+    min-width: 20rem;
+}
+
+.response-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    gap: 1rem;
+}
