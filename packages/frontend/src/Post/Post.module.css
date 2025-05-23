@@ -28,7 +28,7 @@
   min-width: 20rem;
 }
 
-/* Modal styles - improved */
+/* Modal styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -43,11 +43,11 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--background-color, white);
+  color: var(--text-color, black);
   border-radius: 8px;
   padding: 1rem;
   width: 90%;
-  /* min-width: 18.75rem; */
   max-width: 25rem;
   max-height: 90vh;
   overflow-y: auto;
@@ -74,9 +74,10 @@
   font-size: 0.9rem;
   box-sizing: border-box;
   margin: 0;
+  background-color: var(--background-color, white);
+  color: var(--text-color, black);
 }
 
-/* Specific styles for game name textarea */
 #game {
   height: 2em;
   min-height: auto;
@@ -85,7 +86,6 @@
   box-sizing: border-box;
 }
 
-/* Specific styles for description textarea */
 #description {
   height: 4em;
   min-height: auto;
@@ -111,6 +111,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
+  color: var(--text-color, black);
 }
 
 .modal-container textarea {
@@ -141,6 +142,7 @@
 .cancel-button {
   background: #f1f1f1;
   border: 1px solid #ccc;
+  color: black;
 }
 
 .submit-button {
@@ -149,7 +151,6 @@
   border: none;
 }
 
-/* Simple responsive adjustment */
 @media (max-width: 600px) {
   .modal-content {
     max-width: 25rem;

@@ -1,10 +1,23 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import styles from "./Navbar.module.css";
 import { useTheme } from "../ThemeContext";
 
 function Navbar() {
   const { darkMode, toggleDarkMode } = useTheme();
+
+  const [topRightImage, setTopRightImage] = useState<string | null>(null);
+
+  // set the toprightimage to the profile pic if were on home page
+  // set it to home icon if were on any other page
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === "/") {
+      setTopRightImage("./public/profile-pic.png");
+    } else {
+      setTopRightImage("./public/home.png");
+    }
+  }, [window.location.pathname]);
   
   // Apply dark mode class to body
   useEffect(() => {
@@ -29,7 +42,7 @@ function Navbar() {
         <Link to="/profile">
           <img
             className={styles["profile-pic"]}
-            src="./public/profile-pic.png"
+            src={topRightImage || "./public/home.png"}
             alt="Visit Profile"
           />
         </Link>
