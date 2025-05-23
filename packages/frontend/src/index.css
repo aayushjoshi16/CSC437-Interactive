@@ -1,0 +1,23 @@
+:root {
+  --text-color: #000;
+  --background-color: #fff;
+}
+
+body.dark-mode {
+  --text-color: #fff;
+  --background-color: #333;
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+body {
+  color: var(--text-color);
+  background-color: var(--background-color);
+  transition: color 0.3s, background-color 0.3s;
+}
+
+/* Add this to apply dark mode to all containers */
+body.dark-mode .dark-mode-enable {
+  color: var(--text-color);
+  background-color: var(--background-color);
+}

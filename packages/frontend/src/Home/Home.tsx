@@ -1,7 +1,7 @@
 import { useState } from "react";
-import "./Home.css";
-import Navbar from "../Navbar/Navbar";
+import styles from "./Home.module.css";
 import PostEntry from "../Post/PostEntry";
+import CreatePost from "../Post/CreatePost";
 
 // Default posts
 const DEFAULT_POSTS = [
@@ -22,11 +22,20 @@ const DEFAULT_POSTS = [
     votes: 10,
     voted: false,
   },
+  {
+    id: 2,
+    requestUser: "gamernerd",
+    game: "Minecraft",
+    description:
+      "Looking for players to join me in a match today from 3pm to 4pm!",
+    votes: 2,
+    voted: false,
+  },
 ];
-
 
 function Home() {
   const [postArray, setPostArray] = useState(DEFAULT_POSTS);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Function to handle voting
   const handleVote = (postIndex: number) => {
@@ -51,47 +60,67 @@ function Home() {
     }
   };
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCreatePost = (postData: any) => {
+    const newPost = {
+      id: postArray.length,
+      requestUser: "You", // You might want to get this from authentication
+      game: postData.game,
+      description: postData.description,
+      votes: 0,
+      voted: false,
+    };
+
+    setPostArray([...postArray, newPost]);
+  };
+
   return (
-    <div>
-      {/* Nav bar */}
-      <Navbar />
+    <main className={styles["main"]}>
+      <form className={styles["form"]}>
+        <input type="search" placeholder="Search" className={styles["input"]} />
+        <button type="submit">
+          <img
+            className={styles["search-pic"]}
+            src="./public/search.png"
+            alt="Search"
+          />
+        </button>
+        <button
+          type="button"
+          className={styles["create-post-button"]}
+          onClick={handleOpenModal}
+        >
+          <img
+            className={styles["search-pic"]}
+            src="./public/add.png"
+            alt="Create a post"
+          />
+        </button>
+      </form>
 
-      {/* Main content */}
-      <main>
-        {/* Search bar */}
-        <form>
-          <input type="search" placeholder="Search" />
-          <button type="submit">
-            <img
-              className="search-pic"
-              src="./public/search.png"
-              alt="Search"
-            />
-          </button>
-          <a href="./post/index.html">
-            <button type="button" className="create-post-button">
-              <img
-                className="search-pic"
-                src="./public/add.png"
-                alt="Create a post"
-              />
-            </button>
-          </a>
-        </form>
+      <CreatePost
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleCreatePost}
+      />
 
-        {/* Post section */}
-        <div className="post-container">
-          {/* Example posts */}
-          {postArray.map((post, _) => (
-            <PostEntry
-              key={post.id}
-              postInfo={post}
-              handleVote={handleVote}
-            />
-          ))}
-        </div>
-      </main>
-    </div>
+      <div className={styles["post-container"]}>
+        {postArray.map((post, index) => (
+          <PostEntry
+            key={post.id}
+            postInfo={post}
+            handleVote={() => handleVote(index)}
+          />
+        ))}
+      </div>
+    </main>
   );
 }
 

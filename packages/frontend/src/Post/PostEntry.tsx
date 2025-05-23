@@ -1,6 +1,6 @@
 import { AiFillLike } from "react-icons/ai";
 import { AiOutlineLike } from "react-icons/ai";
-import "./Post.css";
+import styles from "./Post.module.css";
 
 // PostInfo interface
 interface PostInfo {
@@ -20,11 +20,11 @@ interface PostEntryProps {
 
 function PostEntry({ postInfo, handleVote }: PostEntryProps) {
   return (
-    <div className="post">
+    <div className={styles["post"]}>
       <p>By {postInfo.requestUser}</p>
       <p>{postInfo.game}</p>
       <p>{postInfo.description}</p>
-      <div className="response-container">
+      <div className={styles["response-container"]}>
         {postInfo.votes}
         <button onClick={() => handleVote(postInfo.id)}>
           {postInfo.voted ? <AiFillLike size={20} /> : <AiOutlineLike size={20}/>}
