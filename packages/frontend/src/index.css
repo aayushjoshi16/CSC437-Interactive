@@ -16,7 +16,6 @@ body {
   transition: color 0.3s, background-color 0.3s;
 }
 
-/* Add this to apply dark mode to all containers */
 body.dark-mode .dark-mode-enable {
   color: var(--text-color);
   background-color: var(--background-color);

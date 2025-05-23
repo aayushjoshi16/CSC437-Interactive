@@ -17,7 +17,9 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
     endTime: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -27,7 +29,12 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    const newDescription =
+      formData.description +
+      `. From ${formData.startDate} ${formData.startTime} to ${formData.endDate} ${formData.endTime}!`;
+    const newFormData = formData;
+    newFormData.description = newDescription;
+    onSubmit(newFormData);
     // Reset form data
     setFormData({
       game: "",
@@ -50,7 +57,7 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className={styles["modal-overlay"]}
       onClick={handleBackgroundClick}
       role="dialog"
@@ -60,8 +67,8 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
       <div className={styles["modal-content"]}>
         <div className={styles["modal-header"]}>
           <h2 id="modal-title">Create a Post</h2>
-          <button 
-            className={styles["close-button"]} 
+          <button
+            className={styles["close-button"]}
             onClick={onClose}
             aria-label="Close dialog"
           >
@@ -100,68 +107,65 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
 
           <div className={styles["post-entry"]}>
             <label htmlFor="startDate">Start Date:</label>
-            <input 
-              type="date" 
-              id="startDate" 
-              name="startDate" 
+            <input
+              type="date"
+              id="startDate"
+              name="startDate"
               value={formData.startDate}
               onChange={handleChange}
-              required 
+              required
               aria-required="true"
             />
           </div>
 
           <div className={styles["post-entry"]}>
             <label htmlFor="startTime">Start Time:</label>
-            <input 
-              type="time" 
-              id="startTime" 
-              name="startTime" 
+            <input
+              type="time"
+              id="startTime"
+              name="startTime"
               value={formData.startTime}
               onChange={handleChange}
-              required 
+              required
               aria-required="true"
             />
           </div>
 
           <div className={styles["post-entry"]}>
             <label htmlFor="endDate">End Date:</label>
-            <input 
-              type="date" 
-              id="endDate" 
-              name="endDate" 
+            <input
+              type="date"
+              id="endDate"
+              name="endDate"
               value={formData.endDate}
               onChange={handleChange}
-              required 
+              required
               aria-required="true"
             />
           </div>
-          
+
           <div className={styles["post-entry"]}>
             <label htmlFor="endTime">End Time:</label>
-            <input 
-              type="time" 
-              id="endTime" 
-              name="endTime" 
+            <input
+              type="time"
+              id="endTime"
+              name="endTime"
               value={formData.endTime}
               onChange={handleChange}
-              required 
+              required
               aria-required="true"
             />
           </div>
 
           <div className={styles["modal-footer"]}>
-            <button 
-              type="button" 
-              onClick={onClose} 
+            <button
+              type="button"
+              onClick={onClose}
               className={styles["cancel-button"]}
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
-              className={styles["submit-button"]}
-            >
+            <button type="submit" className={styles["submit-button"]}>
               Create Post
             </button>
           </div>

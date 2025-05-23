@@ -1,11 +1,15 @@
 import styles from "./Profile.module.css";
+import { Link } from "react-router-dom";
 
 function Profile() {
   return (
     <main className={styles["main"]}>
       {/* Profile picture, username and password */}
       <div className={styles["profile-container"]}>
-        <img className={styles["profile-pic"]} src="../public/profile-pic.png" />
+        <img
+          className={styles["profile-pic"]}
+          src="../public/profile.png"
+        />
 
         <div className={styles["profile-info"]}>
           <p>Username: myuser</p>
@@ -58,7 +62,7 @@ function Profile() {
         <div className={styles["post-container"]}>
           <h2>My Posts</h2>
           <p>
-            None yet. Create one <a href="../post/index.html">here</a>.
+            None yet. Create one <Link to="/">here</Link>.
           </p>
         </div>
       </div>

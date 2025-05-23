@@ -36,6 +36,7 @@ const DEFAULT_POSTS = [
 function Home() {
   const [postArray, setPostArray] = useState(DEFAULT_POSTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Function to handle voting
   const handleVote = (postIndex: number) => {
@@ -71,7 +72,7 @@ function Home() {
   const handleCreatePost = (postData: any) => {
     const newPost = {
       id: postArray.length,
-      requestUser: "You", // You might want to get this from authentication
+      requestUser: "You",
       game: postData.game,
       description: postData.description,
       votes: 0,
@@ -81,10 +82,33 @@ function Home() {
     setPostArray([...postArray, newPost]);
   };
 
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Handle search form submission
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+  };
+
+  // Filter posts based on search term
+  const filteredPosts = searchTerm
+    ? postArray.filter((post) =>
+        post.requestUser.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : postArray;
+
   return (
     <main className={styles["main"]}>
-      <form className={styles["form"]}>
-        <input type="search" placeholder="Search" className={styles["input"]} />
+      <form className={styles["form"]} onSubmit={handleSearch}>
+        <input
+          type="search"
+          placeholder="Search by Username"
+          className={styles["input"]}
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
         <button type="submit">
           <img
             className={styles["search-pic"]}
@@ -112,13 +136,16 @@ function Home() {
       />
 
       <div className={styles["post-container"]}>
-        {postArray.map((post, index) => (
-          <PostEntry
-            key={post.id}
-            postInfo={post}
-            handleVote={() => handleVote(index)}
-          />
-        ))}
+        {filteredPosts.map((post, _) => {
+          const originalIndex = postArray.findIndex((p) => p.id === post.id);
+          return (
+            <PostEntry
+              key={post.id}
+              postInfo={post}
+              handleVote={() => handleVote(originalIndex)}
+            />
+          );
+        })}
       </div>
     </main>
   );
