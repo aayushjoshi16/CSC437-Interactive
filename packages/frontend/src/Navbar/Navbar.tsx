@@ -1,10 +1,23 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import styles from "./Navbar.module.css";
 import { useTheme } from "../ThemeContext";
 
 function Navbar() {
   const { darkMode, toggleDarkMode } = useTheme();
+  const [imageName, setImageName] = useState("profile.png");
+  const [redirectPath, setRedirectPath] = useState("/profile");
+
+  // Set the initial image based on the current path
+  useEffect(() => {
+    if (window.location.pathname === "/profile") {
+      setImageName("home.png");
+      setRedirectPath("/home");
+    } else {
+      setImageName("profile.png");
+      setRedirectPath("/profile");
+    }
+  }, [window.location.pathname]);
 
   // Apply dark mode class to body
   useEffect(() => {
@@ -15,19 +28,18 @@ function Navbar() {
     }
   }, [darkMode]);
 
+  // Handle image click to toggle between home and profile
   const handleImageClick = () => {
-    console.log(window.location.pathname);
-    if (window.location.pathname === "/") {
+    if (window.location.pathname === "/profile") {
+      window.location.href = "/home";
+    } else {
       window.location.href = "/profile";
     }
-    else {
-      window.location.href = "/";
-    }
-  }
+  };
 
   return (
     <nav className={styles["nav"]} aria-label="navbar">
-      <Link to={"/"} className={styles["h1"]}>
+      <Link to={"/home"} className={styles["h1"]}>
         GameBuddy
       </Link>
       <div className={styles["nav-controls"]}>
@@ -38,12 +50,12 @@ function Navbar() {
         >
           {darkMode ? "☀️" : "🌙"}
         </button>
-        <Link to="/profile">
+        <Link to={redirectPath} className={styles["profile-link"]}>
           <img
             onClick={handleImageClick}
             className={styles["profile-pic"]}
-            src={"./public/profile.png"}
-            alt="Visit Profile"
+            src={`../public/${imageName}`}
+            alt={`Visit ${imageName === "home.png" ? "home" : "profile"} page`}
           />
         </Link>
       </div>

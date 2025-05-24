@@ -40,8 +40,15 @@
     gap: 1rem;
 }
 
-h2 {
+.h2 {
     margin-bottom: 0.5rem;
+}
+
+.friends-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
 }
 
 .friend-entry {
@@ -55,6 +62,7 @@ h2 {
 .friend-actions {
     height: 1.5rem;
     width: 1.5rem;
+    cursor: pointer;
 }
 
 .post-container {
@@ -65,5 +73,34 @@ h2 {
     padding: 1rem;
     width: 60vh;
     min-width: 20rem;
+}
 
+/* Add Friend Form */
+.add-friend-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px;
+}
+
+.add-friend-form input {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.add-friend-form button {
+  padding: 6px 12px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-friend-form button:last-child {
+  background-color: #e0e0e0;
+  color: #333;
 }
