@@ -9,12 +9,13 @@ import FriendProfile from "./Profile/FriendProfile";
 function App() {
   return (
     <ThemeProvider>
-      <Navbar />
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/friends/:username" element={<FriendProfile />} />
+        <Route element={<Navbar />}>
+          <Route path="/home" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/friends/:username" element={<FriendProfile />} />
+        </Route>
       </Routes>
     </ThemeProvider>
   );
