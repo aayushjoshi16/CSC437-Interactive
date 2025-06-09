@@ -1,64 +1,104 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./Home.module.css";
 import PostEntry from "../Post/PostEntry";
 import CreatePost from "../Post/CreatePost";
 
-// Default posts
-const DEFAULT_POSTS = [
-  {
-    id: 0,
-    requestUser: "john190",
-    game: "Rocket League",
-    description:
-      "Looking for players to join me in a match today from 3pm to 4pm!",
-    votes: 4,
-    voted: false,
-  },
-  {
-    id: 1,
-    requestUser: "anon65",
-    game: "Call of Duty",
-    description: "Is anyone available for a game on May 15th from 12pm to 3pm?",
-    votes: 10,
-    voted: false,
-  },
-  {
-    id: 2,
-    requestUser: "gamernerd",
-    game: "Minecraft",
-    description:
-      "Looking for players to join me in a match today from 3pm to 4pm!",
-    votes: 2,
-    voted: false,
-  },
-];
+// Interface for the API response format
+interface ApiPost {
+  _id: string;
+  user: string;
+  game: string;
+  description: string;
+  votes: string[];
+  timestamp: Date;
+}
+
+// Interface for our frontend post format
+export interface FrontendPost {
+  id: string;
+  requestUser: string;
+  game: string;
+  description: string;
+  votes: number;
+  voted: boolean;
+}
 
 function Home() {
-  const [postArray, setPostArray] = useState(DEFAULT_POSTS);
+  const [postArray, setPostArray] = useState<FrontendPost[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch posts from the API
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/posts", {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          credentials: "same-origin",
+          cache: "no-cache",
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch posts: ${response.status} ${response.statusText}`
+          );
+        }
+
+        const apiPosts: ApiPost[] = await response.json();
+
+        // Transform API posts to frontend format
+        const transformedPosts: FrontendPost[] = apiPosts.map((post) => ({
+          id: post._id,
+          requestUser: post.user,
+          game: post.game,
+          description: post.description,
+          votes: post.votes.length,
+          voted: false,
+        }));
+
+        setPostArray(transformedPosts);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+        setError("Failed to load posts. Please refresh the page.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   // Function to handle voting
-  const handleVote = (postIndex: number) => {
-    // User wants to vote yes
-    if (postArray[postIndex].voted === false) {
-      setPostArray((prevPostArray) => {
-        const newPostArray = [...prevPostArray];
-        newPostArray[postIndex].votes++;
-        newPostArray[postIndex].voted = true;
-        return newPostArray;
-      });
-    }
+  const handleVote = (postId: string) => {
+    setPostArray((prevPostArray) => {
+      const postIndex = prevPostArray.findIndex((post) => post.id === postId);
 
-    // User wants to remove their vote
-    else {
-      setPostArray((prevPostArray) => {
-        const newPostArray = [...prevPostArray];
-        newPostArray[postIndex].votes--;
-        newPostArray[postIndex].voted = false;
-        return newPostArray;
-      });
-    }
+      if (postIndex === -1) return prevPostArray;
+
+      const newPostArray = [...prevPostArray];
+      const post = newPostArray[postIndex];
+
+      // User wants to vote yes
+      if (!post.voted) {
+        post.votes++;
+        post.voted = true;
+      }
+      // User wants to remove vote
+      else {
+        post.votes--;
+        post.voted = false;
+      }
+
+      return newPostArray;
+    });
   };
 
   const handleOpenModal = () => {
@@ -68,10 +108,9 @@ function Home() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-
   const handleCreatePost = (postData: any) => {
     const newPost = {
-      id: postArray.length,
+      id: String(postArray.length),
       requestUser: "You",
       game: postData.game,
       description: postData.description,
@@ -128,24 +167,34 @@ function Home() {
           />
         </button>
       </form>
-
       <CreatePost
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleCreatePost}
-      />
-
+      />{" "}
       <div className={styles["post-container"]}>
-        {filteredPosts.map((post, _) => {
-          const originalIndex = postArray.findIndex((p) => p.id === post.id);
-          return (
+        {isLoading ? (
+          <p>Loading posts...</p>
+        ) : error ? (
+          <div>
+            <p>{error}</p>
+            {filteredPosts.map((post, _) => (
+              <PostEntry
+                key={post.id}
+                postInfo={post}
+                handleVote={() => handleVote(post.id)}
+              />
+            ))}
+          </div>
+        ) : (
+          filteredPosts.map((post, _) => (
             <PostEntry
               key={post.id}
               postInfo={post}
-              handleVote={() => handleVote(originalIndex)}
+              handleVote={() => handleVote(post.id)}
             />
-          );
-        })}
+          ))
+        )}
       </div>
     </main>
   );

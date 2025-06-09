@@ -1,16 +1,40 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import path from "path";
+import { MongoClient } from "mongodb";
+import { connectMongo } from "./connectMongo";
+import { PostProvider } from "./providers/PostProvider";
+import { registerPostRoutes } from "./routes/postRoutes";
+
 import { ValidRoutes } from "./shared/ValidRoutes";
 
 dotenv.config(); // Read the .env file in the current working directory, and load values into process.env.
 const PORT = process.env.PORT || 3000;
 const STATIC_DIR = process.env.STATIC_DIR || "public";
+let mongoClient: MongoClient;
+let postProvider: PostProvider;
 
 const app = express();
+
+// Connect to MongoDB
+(async () => {
+  try {
+    mongoClient = await connectMongo();
+    postProvider = new PostProvider(mongoClient);
+    console.log("MongoDB connection established successfully.");
+
+    // Register routes after successful MongoDB connection
+    // app.use("/api/*", verifyAuthToken);
+    registerPostRoutes(app, postProvider);
+    // registerAuthRoutes(app, credentialsProvider);
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error);
+    process.exit(1);
+  }
+})();
 app.use(express.static(STATIC_DIR));
 
-app.get("/hello", (req: Request, res: Response) => {
+app.get("/api/hello", (req: Request, res: Response) => {
   res.send("Hello, World");
 });
 

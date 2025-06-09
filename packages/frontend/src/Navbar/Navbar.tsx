@@ -8,7 +8,6 @@ function Navbar() {
   const [imageName, setImageName] = useState("profile.png");
   const [redirectPath, setRedirectPath] = useState("/profile");
   const location = useLocation();
-
   // Set the initial image based on the current path
   useEffect(() => {
     if (location.pathname === "/profile") {
