@@ -14,19 +14,12 @@ app.get("/hello", (req: Request, res: Response) => {
   res.send("Hello, World");
 });
 
-// API routes can go here
+// Dynamic route handler for all valid frontend routes
 Object.values(ValidRoutes).forEach((route) => {
-  // Create actual API endpoints if needed
-  app.get(`/api${route}`, (req: Request, res: Response) => {
-    res.send(`API endpoint for route: ${route}`);
+  app.get(route, (req: Request, res: Response) => {
+    const indexPath = path.join(__dirname, "../../frontend/dist/index.html");
+    res.sendFile(indexPath);
   });
-});
-
-// Important: This catch-all route should be defined AFTER all other API routes
-// This sends the main index.html for any path that doesn't match an API or static file
-// allowing client-side routing to take over
-app.get("*", (req: Request, res: Response) => {
-  res.sendFile(path.resolve(STATIC_DIR, "index.html"));
 });
 
 app.listen(PORT, () => {
