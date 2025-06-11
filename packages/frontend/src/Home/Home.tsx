@@ -109,7 +109,7 @@ function Home() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-  
+
   const handleCreatePost = async (postData: any) => {
     try {
       // Create the post object to send to the API
@@ -150,20 +150,22 @@ function Home() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
   };
-
-  // Filter posts based on search term
+  // Filter posts based on search term (search both user and game)
   const filteredPosts = searchTerm
-    ? postArray.filter((post) =>
-        post.requestUser.toLowerCase().includes(searchTerm.toLowerCase())
+    ? postArray.filter(
+        (post) =>
+          post.requestUser.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          post.game.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : postArray;
 
   return (
     <main className={styles["main"]}>
       <form className={styles["form"]} onSubmit={handleSearch}>
+        {" "}
         <input
           type="search"
-          placeholder="Search by Username"
+          placeholder="Search by Username or Game"
           className={styles["input"]}
           value={searchTerm}
           onChange={handleSearchChange}

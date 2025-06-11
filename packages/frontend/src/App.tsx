@@ -4,17 +4,17 @@ import Profile from "./Profile/Profile";
 import Navbar from "./Navbar/Navbar";
 import { ThemeProvider } from "./ThemeContext";
 import Login from "./Login/Login";
+import Register from "./Login/Register";
 import FriendProfile from "./Profile/FriendProfile";
 import { ValidRoutes } from "@backend/shared/ValidRoutes";
 
 function App() {
-  // Log routes for debugging
-  console.log("ValidRoutes:", ValidRoutes);
   return (
     <ThemeProvider>
       <Routes>
-        {/* Login route outside the Navbar */}
+        {/* Login and Register routes outside the Navbar */}
         <Route path={ValidRoutes.LOGIN} element={<Login />} />
+        <Route path={ValidRoutes.REGISTER} element={<Register />} />
 
         {/* Routes with Navbar */}
         <Route path="/" element={<Navbar />}>
