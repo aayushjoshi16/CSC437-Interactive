@@ -4,7 +4,7 @@ import styles from "./Post.module.css";
 interface CreatePostProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (post: any) => void;
+  onSubmit: (post: any) => Promise<void>;
 }
 
 function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
@@ -16,6 +16,7 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
     endDate: "",
     endTime: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -26,25 +27,38 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
       [name]: value,
     }));
   };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newDescription =
-      formData.description +
-      `. From ${formData.startDate} ${formData.startTime} to ${formData.endDate} ${formData.endTime}!`;
-    const newFormData = formData;
-    newFormData.description = newDescription;
-    onSubmit(newFormData);
-    // Reset form data
-    setFormData({
-      game: "",
-      description: "",
-      startDate: "",
-      startTime: "",
-      endDate: "",
-      endTime: "",
-    });
-    onClose();
+    setIsSubmitting(true);
+
+    try {
+      // Combine the description with the date/time information
+      const fullDescription =
+        formData.description +
+        `. From ${formData.startDate} ${formData.startTime} to ${formData.endDate} ${formData.endTime}!`;
+
+      const postData = {
+        game: formData.game,
+        description: fullDescription,
+      };
+
+      await onSubmit(postData);
+
+      // Reset form data only if submission was successful
+      setFormData({
+        game: "",
+        description: "",
+        startDate: "",
+        startTime: "",
+        endDate: "",
+        endTime: "",
+      });
+      onClose();
+    } catch (error) {
+      console.error("Error submitting post:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Handle background click to close modal
@@ -90,7 +104,6 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
               autoFocus
             ></textarea>
           </div>
-
           <div className={styles["post-entry"]}>
             <label htmlFor="description">Description:</label>
             <textarea
@@ -104,7 +117,6 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
               aria-required="true"
             ></textarea>
           </div>
-
           <div className={styles["post-entry"]}>
             <label htmlFor="startDate">Start Date:</label>
             <input
@@ -117,7 +129,6 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
               aria-required="true"
             />
           </div>
-
           <div className={styles["post-entry"]}>
             <label htmlFor="startTime">Start Time:</label>
             <input
@@ -130,7 +141,6 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
               aria-required="true"
             />
           </div>
-
           <div className={styles["post-entry"]}>
             <label htmlFor="endDate">End Date:</label>
             <input
@@ -143,7 +153,6 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
               aria-required="true"
             />
           </div>
-
           <div className={styles["post-entry"]}>
             <label htmlFor="endTime">End Time:</label>
             <input
@@ -155,18 +164,22 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
               required
               aria-required="true"
             />
-          </div>
-
+          </div>{" "}
           <div className={styles["modal-footer"]}>
             <button
               type="button"
               onClick={onClose}
               className={styles["cancel-button"]}
+              disabled={isSubmitting}
             >
               Cancel
             </button>
-            <button type="submit" className={styles["submit-button"]}>
-              Create Post
+            <button
+              type="submit"
+              className={styles["submit-button"]}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating..." : "Create Post"}
             </button>
           </div>
         </form>

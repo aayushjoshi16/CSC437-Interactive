@@ -24,4 +24,7 @@ export class PostProvider {
   getAllPosts() {
     return this.collection.find().toArray(); // Without any options, will by default get all documents in the collection as an array.
   }
+  createPost(post: Omit<PostDocument, "_id">) {
+    return this.collection.insertOne(post as PostDocument); // Insert a new post document into the collection.
+  }
 }

@@ -151,6 +151,16 @@
   border: none;
 }
 
+.submit-button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.cancel-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
   .modal-content {
     max-width: 25rem;

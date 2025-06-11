@@ -15,6 +15,7 @@ let mongoClient: MongoClient;
 let postProvider: PostProvider;
 
 const app = express();
+app.use(express.json());
 
 // Connect to MongoDB
 (async () => {

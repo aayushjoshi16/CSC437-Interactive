@@ -29,50 +29,49 @@ function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   // Fetch posts from the API
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch("/api/posts", {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          credentials: "same-origin",
-          cache: "no-cache",
-        });
+  const fetchPosts = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/posts", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        credentials: "same-origin",
+        cache: "no-cache",
+      });
 
-        if (!response.ok) {
-          throw new Error(
-            `Failed to fetch posts: ${response.status} ${response.statusText}`
-          );
-        }
-
-        const apiPosts: ApiPost[] = await response.json();
-
-        // Transform API posts to frontend format
-        const transformedPosts: FrontendPost[] = apiPosts.map((post) => ({
-          id: post._id,
-          requestUser: post.user,
-          game: post.game,
-          description: post.description,
-          votes: post.votes.length,
-          voted: false,
-        }));
-
-        setPostArray(transformedPosts);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching posts:", err);
-        setError("Failed to load posts. Please refresh the page.");
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch posts: ${response.status} ${response.statusText}`
+        );
       }
-    };
 
+      const apiPosts: ApiPost[] = await response.json();
+
+      // Transform API posts to frontend format
+      const transformedPosts: FrontendPost[] = apiPosts.map((post) => ({
+        id: post._id,
+        requestUser: post.user,
+        game: post.game,
+        description: post.description,
+        votes: post.votes.length,
+        voted: false,
+      }));
+
+      setPostArray(transformedPosts);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching posts:", err);
+      setError("Failed to load posts. Please refresh the page.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchPosts();
   }, []);
 
@@ -108,17 +107,36 @@ function Home() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-  const handleCreatePost = (postData: any) => {
-    const newPost = {
-      id: String(postArray.length),
-      requestUser: "You",
-      game: postData.game,
-      description: postData.description,
-      votes: 0,
-      voted: false,
-    };
+  
+  const handleCreatePost = async (postData: any) => {
+    try {
+      // Create the post object to send to the API
+      const postToCreate = {
+        user: "myuser", // For now, using a hardcoded username - this would come from auth later
+        game: postData.game,
+        description: postData.description,
+      };
 
-    setPostArray([...postArray, newPost]);
+      // Send POST request to create the post
+      const response = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(postToCreate),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to create post: ${response.status} ${response.statusText}`
+        );
+      }
+
+      await fetchPosts();
+    } catch (error) {
+      console.error("Error creating post:", error);
+      alert("Failed to create post. Please try again.");
+    }
   };
 
   // Handle search input change
