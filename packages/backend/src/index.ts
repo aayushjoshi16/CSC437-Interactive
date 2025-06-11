@@ -4,7 +4,9 @@ import path from "path";
 import { MongoClient } from "mongodb";
 import { connectMongo } from "./connectMongo";
 import { PostProvider } from "./providers/PostProvider";
+import { CredentialsProvider } from "./providers/CredentialsProvider";
 import { registerPostRoutes } from "./routes/postRoutes";
+import { registerAuthRoutes } from "./routes/authRoutes";
 
 import { ValidRoutes } from "./shared/ValidRoutes";
 
@@ -13,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 const STATIC_DIR = process.env.STATIC_DIR || "public";
 let mongoClient: MongoClient;
 let postProvider: PostProvider;
+let credentialsProvider: CredentialsProvider;
 
 const app = express();
 app.use(express.json());
@@ -22,12 +25,13 @@ app.use(express.json());
   try {
     mongoClient = await connectMongo();
     postProvider = new PostProvider(mongoClient);
+    credentialsProvider = new CredentialsProvider(mongoClient);
     console.log("MongoDB connection established successfully.");
 
     // Register routes after successful MongoDB connection
     // app.use("/api/*", verifyAuthToken);
     registerPostRoutes(app, postProvider);
-    // registerAuthRoutes(app, credentialsProvider);
+    registerAuthRoutes(app, credentialsProvider);
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
     process.exit(1);
