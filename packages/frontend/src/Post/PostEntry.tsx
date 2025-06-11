@@ -9,12 +9,28 @@ interface PostEntryProps {
   handleVote: () => void;
 }
 
+// Function to format timestamp for display
+const formatTimestamp = (timestamp: Date): string => {
+  if (!timestamp || !(timestamp instanceof Date) || isNaN(timestamp.getTime())) {
+    return "Unknown date";
+  }
+  
+  return timestamp.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 function PostEntry({ postInfo, handleVote }: PostEntryProps) {
   return (
     <div className={styles["post"]}>
       <p>By {postInfo.requestUser}</p>
+      <p>Posted at {formatTimestamp(postInfo.timestamp)}</p>
       <p>{postInfo.game}</p>
-      <p>{postInfo.description}</p>{" "}
+      <p>{postInfo.description}</p>
       <div className={styles["response-container"]}>
         {postInfo.votes}
         <button onClick={handleVote}>

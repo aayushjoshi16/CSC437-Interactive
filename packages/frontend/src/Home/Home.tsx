@@ -21,6 +21,7 @@ export interface FrontendPost {
   description: string;
   votes: number;
   voted: boolean;
+  timestamp: Date;
 }
 
 function Home() {
@@ -59,6 +60,7 @@ function Home() {
         description: post.description,
         votes: post.votes.length,
         voted: false,
+        timestamp: new Date(post.timestamp),
       }));
 
       setPostArray(transformedPosts);

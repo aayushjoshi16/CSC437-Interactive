@@ -18,6 +18,25 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Function to format timestamp for display
+  const formatTimestamp = (timestamp: Date): string => {
+    if (
+      !timestamp ||
+      !(timestamp instanceof Date) ||
+      isNaN(timestamp.getTime())
+    ) {
+      return "Unknown date";
+    }
+
+    return timestamp.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -32,10 +51,19 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
     setIsSubmitting(true);
 
     try {
-      // Combine the description with the date/time information
+      // Create Date objects from the form inputs and format them
+      const startDateTime = new Date(
+        `${formData.startDate}T${formData.startTime}`
+      );
+      const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`);
+
+      const formattedStartDate = formatTimestamp(startDateTime);
+      const formattedEndDate = formatTimestamp(endDateTime);
+
+      // Combine the description with the formatted date/time information
       const fullDescription =
         formData.description +
-        `. From ${formData.startDate} ${formData.startTime} to ${formData.endDate} ${formData.endTime}!`;
+        `. From ${formattedStartDate} to ${formattedEndDate}!`;
 
       const postData = {
         game: formData.game,
