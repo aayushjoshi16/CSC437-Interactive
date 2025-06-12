@@ -82,6 +82,37 @@ export class PostProvider {
     };
   }
 
+  // Get paginated posts for a specific user
+  async getUserPaginatedPosts(
+    username: string,
+    options: PaginationOptions
+  ): Promise<PaginatedResult<PostDocument>> {
+    const { page = 1, limit = 10 } = options;
+    const skip = (page - 1) * limit;
+
+    // Filter by the specified username
+    const filter = { user: username };
+
+    // Execute queries in parallel for better performance
+    const [data, total] = await Promise.all([
+      this.collection
+        .find(filter)
+        .sort({ timestamp: -1 }) // Sort by newest first
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
+      this.collection.countDocuments(filter),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
   createPost(post: Omit<PostDocument, "_id">) {
     return this.collection.insertOne(post as PostDocument); // Insert a new post document into the collection.
   }

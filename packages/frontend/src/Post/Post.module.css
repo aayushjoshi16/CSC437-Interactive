@@ -3,8 +3,9 @@
   border: 5px solid #3083ff;
   border-radius: 1rem;
   padding: 1rem;
-  width: 60vh;
-  min-width: 20rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
 }
 
 .response-container {

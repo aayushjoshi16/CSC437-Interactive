@@ -9,7 +9,7 @@ export function registerPostRoutes(app: Express, postProvider: PostProvider) {
       // Extract pagination parameters from query string
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
-      const searchTerm = req.query.search as string || "";
+      const searchTerm = (req.query.search as string) || "";
 
       // Validate pagination parameters
       if (page < 1 || limit < 1 || limit > 50) {
@@ -110,4 +110,37 @@ export function registerPostRoutes(app: Express, postProvider: PostProvider) {
       }
     }
   );
+
+  // Route to get paginated posts for a specific user
+  app.get("/api/posts/user/:username", async (req: Request, res: Response) => {
+    try {
+      const { username } = req.params;
+
+      // Extract pagination parameters from query string
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      // Validate pagination parameters
+      if (page < 1 || limit < 1 || limit > 50) {
+        res.status(400).json({
+          error:
+            "Invalid pagination parameters. Page must be >= 1 and limit must be between 1 and 50.",
+        });
+        return;
+      }
+
+      // Get paginated posts for the specified user
+      const paginatedResult = await postProvider.getUserPaginatedPosts(
+        username,
+        {
+          page,
+          limit,
+        }
+      );
+      res.json(paginatedResult);
+    } catch (error) {
+      console.error("Error retrieving user posts:", error);
+      res.status(500).json({ error: "Failed to retrieve user posts" });
+    }
+  });
 }
