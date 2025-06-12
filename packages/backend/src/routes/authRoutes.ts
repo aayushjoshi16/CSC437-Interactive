@@ -44,7 +44,7 @@ export function registerAuthRoutes(
       if (success) {
         res.status(201).json({ message: "User registered successfully" });
       } else {
-        res.status(409).json({ error: "User already exists" });
+        res.status(409).json({ error: "User with this username already exists" });
       }
     } catch (error) {
       console.error("Error registering user:", error);

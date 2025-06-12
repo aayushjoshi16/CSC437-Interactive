@@ -54,15 +54,13 @@ function Home() {
       }
 
       const apiPosts: ApiPost[] = await response.json();
-
-      // Transform API posts to frontend format
       const transformedPosts: FrontendPost[] = apiPosts.map((post) => ({
         id: post._id,
         requestUser: post.user,
         game: post.game,
         description: post.description,
         votes: post.votes.length,
-        voted: false,
+        voted: post.votes.includes(username || ""), // Check if current user has voted
         timestamp: new Date(post.timestamp),
       }));
 
@@ -81,28 +79,39 @@ function Home() {
   }, []);
 
   // Function to handle voting
-  const handleVote = (postId: string) => {
-    setPostArray((prevPostArray) => {
-      const postIndex = prevPostArray.findIndex((post) => post.id === postId);
+  const handleVote = async (postId: string) => {
+    try {
+      const response = await fetch(`/api/posts/${postId}/vote`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      if (postIndex === -1) return prevPostArray;
-
-      const newPostArray = [...prevPostArray];
-      const post = newPostArray[postIndex];
-
-      // User wants to vote yes
-      if (!post.voted) {
-        post.votes++;
-        post.voted = true;
-      }
-      // User wants to remove vote
-      else {
-        post.votes--;
-        post.voted = false;
+      if (!response.ok) {
+        throw new Error(`Failed to toggle vote: ${response.status}`);
       }
 
-      return newPostArray;
-    });
+      const data = await response.json();
+
+      // Update the post in the local state
+      setPostArray((prevPostArray) => {
+        return prevPostArray.map((post) => {
+          if (post.id === postId) {
+            return {
+              ...post,
+              voted: data.voted,
+              votes: data.voteCount,
+            };
+          }
+          return post;
+        });
+      });
+    } catch (error) {
+      console.error("Error toggling vote:", error);
+      alert("Failed to toggle vote. Please try again.");
+    }
   };
 
   const handleOpenModal = () => {
@@ -112,7 +121,7 @@ function Home() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-  
+
   const handleCreatePost = async (postData: any) => {
     try {
       // Create the post object to send to the API
@@ -208,13 +217,7 @@ function Home() {
         ) : error ? (
           <div>
             <p>{error}</p>
-            {filteredPosts.map((post, _) => (
-              <PostEntry
-                key={post.id}
-                postInfo={post}
-                handleVote={() => handleVote(post.id)}
-              />
-            ))}
+            <button onClick={fetchPosts}>Retry</button>
           </div>
         ) : (
           filteredPosts.map((post, _) => (

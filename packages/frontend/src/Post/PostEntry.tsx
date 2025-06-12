@@ -6,7 +6,7 @@ import type { FrontendPost } from "../Home/Home"
 // PostEntryProps interface
 interface PostEntryProps {
   postInfo: FrontendPost;
-  handleVote: () => void;
+  handleVote: () => Promise<void>;
 }
 
 // Function to format timestamp for display
