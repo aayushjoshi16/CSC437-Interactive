@@ -9,6 +9,22 @@ interface PostDocument {
   timestamp: Date; // Timestamp of when the post was created
 }
 
+// Interface for pagination parameters
+export interface PaginationOptions {
+  page: number;
+  limit: number;
+  searchTerm?: string;
+}
+
+// Interface for pagination result
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export class PostProvider {
   private collection: Collection<PostDocument>;
 
@@ -20,9 +36,52 @@ export class PostProvider {
       );
     }
     this.collection = this.mongoClient.db().collection(collectionName);
-  }  getAllPosts() {
-    return this.collection.find().toArray();  // Get all documents in the collection as an array.
   }
+
+  // Original method to get all posts (keeping for backward compatibility)
+  getAllPosts() {
+    return this.collection.find().toArray();
+  }
+
+  // Updated method with pagination and search support
+  async getPaginatedPosts(
+    options: PaginationOptions & { searchTerm?: string }
+  ): Promise<PaginatedResult<PostDocument>> {
+    const { page = 1, limit = 10, searchTerm = "" } = options;
+    const skip = (page - 1) * limit;
+
+    // Build query filter based on search term if provided
+    let filter = {};
+    if (searchTerm && searchTerm.trim() !== "") {
+      // Case-insensitive search for either username or game
+      filter = {
+        $or: [
+          { user: { $regex: searchTerm, $options: "i" } },
+          { game: { $regex: searchTerm, $options: "i" } },
+        ],
+      };
+    }
+
+    // Execute queries in parallel for better performance
+    const [data, total] = await Promise.all([
+      this.collection
+        .find(filter)
+        .sort({ timestamp: -1 }) // Sort by newest first
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
+      this.collection.countDocuments(filter),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
   createPost(post: Omit<PostDocument, "_id">) {
     return this.collection.insertOne(post as PostDocument); // Insert a new post document into the collection.
   }

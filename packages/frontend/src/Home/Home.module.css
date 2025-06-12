@@ -1,47 +1,84 @@
 * {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 /* Main content */
 .main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 60%;
-    margin: 2rem auto;
-    min-width: 30rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60%;
+  margin: 2rem auto;
+  min-width: 30rem;
 }
 
 /* Search bar */
 .form {
-    border-radius: 5px;
-    display: flex;
-    flex-direction: row;
-    width: 80vh;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    min-width: 20rem;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: row;
+  width: 80vh;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  min-width: 20rem;
 }
 
 .input {
-    width: 100%;
-    border-radius: 15px;
-    border: 1px solid #ccc;
-    padding: 1rem;
+  width: 100%;
+  border-radius: 15px;
+  border: 1px solid #ccc;
+  padding: 1rem;
 }
 
 .search-pic {
-    border-radius: 15px;
-    height: 1.5rem;
-    width: 1.5rem;
-    padding: 0.5rem;
+  border-radius: 15px;
+  height: 1.5rem;
+  width: 1.5rem;
+  padding: 0.5rem;
 }
 
 /* Posts */
 .post-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Pagination Controls */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1.5rem 0;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.pagination-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.pagination-button:hover {
+  background-color: #e0e0e0;
+}
+
+.pagination-button:disabled {
+  background-color: #f0f0f0;
+  color: #aaa;
+  cursor: not-allowed;
+  border-color: #ddd;
+}
+
+.pagination-info {
+  margin: 0 1rem;
+  font-size: 0.9rem;
+  color: #666;
 }

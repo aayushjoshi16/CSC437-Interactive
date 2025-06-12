@@ -25,18 +25,44 @@ export interface FrontendPost {
   timestamp: Date;
 }
 
+// Interface for paginated data from the API
+interface PaginatedResponse {
+  data: ApiPost[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 function Home() {
   const { token, username } = useAuth();
   const [postArray, setPostArray] = useState<FrontendPost[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeSearchTerm, setActiveSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); // Fetch posts from the API
-  const fetchPosts = async () => {
+  const [error, setError] = useState<string | null>(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [totalPosts, setTotalPosts] = useState(0);
+
+  // Fetch posts from the API with pagination and search
+  const fetchPosts = async (page = currentPage, limit = pageSize, search = searchTerm) => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/posts", {
+      
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
+      
+      if (search) {
+        params.append('search', search);
+      }
+      
+      const response = await fetch(`/api/posts?${params.toString()}`, {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -53,8 +79,8 @@ function Home() {
         );
       }
 
-      const apiPosts: ApiPost[] = await response.json();
-      const transformedPosts: FrontendPost[] = apiPosts.map((post) => ({
+      const paginatedData: PaginatedResponse = await response.json();
+      const transformedPosts: FrontendPost[] = paginatedData.data.map((post) => ({
         id: post._id,
         requestUser: post.user,
         game: post.game,
@@ -65,6 +91,10 @@ function Home() {
       }));
 
       setPostArray(transformedPosts);
+      setTotalPages(paginatedData.totalPages);
+      setTotalPosts(paginatedData.total);
+      setCurrentPage(paginatedData.page);
+      setPageSize(paginatedData.limit);
       setError(null);
     } catch (err) {
       console.error("Error fetching posts:", err);
@@ -75,8 +105,19 @@ function Home() {
   };
 
   useEffect(() => {
-    fetchPosts();
+    fetchPosts(currentPage, pageSize, searchTerm);
   }, []);
+
+  // Function to handle page changes
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      fetchPosts(newPage, pageSize, searchTerm);
+
+      // Scroll to top when changing pages
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   // Function to handle voting
   const handleVote = async (postId: string) => {
@@ -146,8 +187,12 @@ function Home() {
           `Failed to create post: ${response.status} ${response.statusText}`
         );
       }
+   
+      setCurrentPage(1);
+      await fetchPosts(1, pageSize, searchTerm);
 
-      await fetchPosts();
+      // Close the modal
+      handleCloseModal();
     } catch (error) {
       console.error("Error creating post:", error);
       alert("Failed to create post. Please try again.");
@@ -162,35 +207,64 @@ function Home() {
   // Handle search form submission
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setActiveSearchTerm(searchTerm);
+
+    // Reset to first page when searching
+    setCurrentPage(1);
+    fetchPosts(1, pageSize, searchTerm);
   };
 
-  // Filter posts based on active search term (search both user and game)
-  const filteredPosts = activeSearchTerm
-    ? postArray.filter(
-        (post) =>
-          post.requestUser
-            .toLowerCase()
-            .includes(activeSearchTerm.toLowerCase()) ||
-          post.game.toLowerCase().includes(activeSearchTerm.toLowerCase())
-      )
-    : postArray;
+  // Generate pagination controls
+  const renderPaginationControls = () => {
+    return (
+      <div className={styles["pagination-controls"]}>
+        <button
+          className={styles["pagination-button"]}
+          onClick={() => handlePageChange(1)}
+          disabled={currentPage === 1}
+        >
+          &laquo; First
+        </button>
+        <button
+          className={styles["pagination-button"]}
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          &lt; Previous
+        </button>
+        <span className={styles["pagination-info"]}>
+          Page {currentPage} of {totalPages} ({totalPosts} posts)
+        </span>
+        <button
+          className={styles["pagination-button"]}
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Next &gt;
+        </button>
+        <button
+          className={styles["pagination-button"]}
+          onClick={() => handlePageChange(totalPages)}
+          disabled={currentPage === totalPages}
+        >
+          Last &raquo;
+        </button>
+      </div>
+    );
+  };
 
   return (
     <main className={styles["main"]}>
       <form className={styles["form"]} onSubmit={handleSearch}>
-        {" "}
         <input
           type="search"
           placeholder="Search by Username or Game"
           className={styles["input"]}
           value={searchTerm}
           onChange={handleSearchChange}
-        />
-        <button type="submit">
+        />        <button type="submit">
           <img
             className={styles["search-pic"]}
-            src="./public/search.png"
+            src="/search.png"
             alt="Search"
           />
         </button>
@@ -201,7 +275,7 @@ function Home() {
         >
           <img
             className={styles["search-pic"]}
-            src="./public/add.png"
+            src="/add.png"
             alt="Create a post"
           />
         </button>
@@ -213,14 +287,20 @@ function Home() {
       />{" "}
       <div className={styles["post-container"]}>
         {isLoading ? (
-          <p>Loading posts...</p>
-        ) : error ? (
+          <p>Loading posts...</p>        ) : error ? (
           <div>
             <p>{error}</p>
-            <button onClick={fetchPosts}>Retry</button>
+            <button onClick={() => fetchPosts(currentPage, pageSize, searchTerm)}>Retry</button>
           </div>
+        ) : postArray.length === 0 ? (
+          <p>
+            No posts found.{" "}
+            {searchTerm
+              ? "Try a different search term."
+              : "Be the first to create a post!"}
+          </p>
         ) : (
-          filteredPosts.map((post, _) => (
+          postArray.map((post) => (
             <PostEntry
               key={post.id}
               postInfo={post}
@@ -229,6 +309,9 @@ function Home() {
           ))
         )}
       </div>
+
+      {/* Pagination controls at the bottom */}
+      {!isLoading && !error && totalPages > 1 && renderPaginationControls()}
     </main>
   );
 }
