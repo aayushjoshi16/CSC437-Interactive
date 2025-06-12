@@ -2,12 +2,15 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import styles from "./Navbar.module.css";
 import { useTheme } from "../ThemeContext";
+import { useAuth } from "../contexts/AuthContext";
 
 function Navbar() {
   const { darkMode, toggleDarkMode } = useTheme();
+  const { logout, username } = useAuth();
   const [imageName, setImageName] = useState("profile.png");
   const [redirectPath, setRedirectPath] = useState("/profile");
   const location = useLocation();
+
   // Set the initial image based on the current path
   useEffect(() => {
     if (location.pathname === "/profile") {
@@ -33,7 +36,8 @@ function Navbar() {
       <nav className={styles["nav"]} aria-label="navbar">
         <Link to={"/home"} className={styles["h1"]}>
           GameBuddy
-        </Link>
+        </Link>{" "}
+        <span className={styles["welcome-message"]}>Welcome, {username}!</span>
         <div className={styles["nav-controls"]}>
           <button
             onClick={toggleDarkMode}
@@ -53,6 +57,14 @@ function Navbar() {
               } page`}
             />
           </Link>
+
+          <button
+            onClick={logout}
+            className={styles["logout-button"]}
+            aria-label="Logout"
+          >
+            Logout
+          </button>
         </div>
       </nav>
       <Outlet />

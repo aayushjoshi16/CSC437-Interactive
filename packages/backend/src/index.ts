@@ -7,12 +7,24 @@ import { PostProvider } from "./providers/PostProvider";
 import { CredentialsProvider } from "./providers/CredentialsProvider";
 import { registerPostRoutes } from "./routes/postRoutes";
 import { registerAuthRoutes } from "./routes/authRoutes";
+import { registerImageRoutes } from "./routes/imageRoutes";
+import { verifyAuthToken } from "./middleware/authMiddleware";
 
 import { ValidRoutes } from "./shared/ValidRoutes";
 
 dotenv.config(); // Read the .env file in the current working directory, and load values into process.env.
 const PORT = process.env.PORT || 3000;
 const STATIC_DIR = process.env.STATIC_DIR || "public";
+
+// Safely read and store JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error(
+    "JWT_SECRET is required but not found in environment variables"
+  );
+  process.exit(1);
+}
+
 let mongoClient: MongoClient;
 let postProvider: PostProvider;
 let credentialsProvider: CredentialsProvider;
@@ -20,18 +32,20 @@ let credentialsProvider: CredentialsProvider;
 const app = express();
 app.use(express.json());
 
+// Store JWT_SECRET in app.locals for access in request handlers
+app.locals.JWT_SECRET = JWT_SECRET;
+
 // Connect to MongoDB
 (async () => {
   try {
     mongoClient = await connectMongo();
     postProvider = new PostProvider(mongoClient);
     credentialsProvider = new CredentialsProvider(mongoClient);
-    console.log("MongoDB connection established successfully.");
-
-    // Register routes after successful MongoDB connection
-    // app.use("/api/*", verifyAuthToken);
+    console.log("MongoDB connection established successfully."); // Register routes after successful MongoDB connection
+    app.use("/api/*", verifyAuthToken);
     registerPostRoutes(app, postProvider);
     registerAuthRoutes(app, credentialsProvider);
+    registerImageRoutes(app);
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
     process.exit(1);

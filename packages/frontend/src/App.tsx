@@ -3,6 +3,8 @@ import Home from "./Home/Home";
 import Profile from "./Profile/Profile";
 import Navbar from "./Navbar/Navbar";
 import { ThemeProvider } from "./ThemeContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute, AuthRedirect } from "./components/ProtectedRoute";
 import Login from "./Login/Login";
 import Register from "./Login/Register";
 import FriendProfile from "./Profile/FriendProfile";
@@ -11,22 +13,45 @@ import { ValidRoutes } from "@backend/shared/ValidRoutes";
 function App() {
   return (
     <ThemeProvider>
-      <Routes>
-        {/* Login and Register routes outside the Navbar */}
-        <Route path={ValidRoutes.LOGIN} element={<Login />} />
-        <Route path={ValidRoutes.REGISTER} element={<Register />} />
+      <AuthProvider>
+        <Routes>
+          {/* Login and Register routes outside the Navbar - redirect if already authenticated */}
+          <Route
+            path={ValidRoutes.LOGIN}
+            element={
+              <AuthRedirect>
+                <Login />
+              </AuthRedirect>
+            }
+          />
+          <Route
+            path={ValidRoutes.REGISTER}
+            element={
+              <AuthRedirect>
+                <Register />
+              </AuthRedirect>
+            }
+          />
 
-        {/* Routes with Navbar */}
-        <Route path="/" element={<Navbar />}>
-          {/* Root path renders Home */}
-          <Route index element={<Home />} />
+          {/* Protected routes with Navbar */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+              </ProtectedRoute>
+            }
+          >
+            {/* Root path renders Home */}
+            <Route index element={<Home />} />
 
-          {/* Other routes inside Navbar */}
-          <Route path={ValidRoutes.HOME} element={<Home />} />
-          <Route path={ValidRoutes.PROFILE} element={<Profile />} />
-          <Route path={ValidRoutes.FRIENDS} element={<FriendProfile />} />
-        </Route>
-      </Routes>
+            {/* Other protected routes inside Navbar */}
+            <Route path={ValidRoutes.HOME} element={<Home />} />
+            <Route path={ValidRoutes.PROFILE} element={<Profile />} />
+            <Route path={ValidRoutes.FRIENDS} element={<FriendProfile />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import styles from "./Home.module.css";
 import PostEntry from "../Post/PostEntry";
 import CreatePost from "../Post/CreatePost";
+import { useAuth } from "../contexts/AuthContext";
 
 // Interface for the API response format
 interface ApiPost {
@@ -25,12 +26,13 @@ export interface FrontendPost {
 }
 
 function Home() {
+  const { token, username } = useAuth();
   const [postArray, setPostArray] = useState<FrontendPost[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeSearchTerm, setActiveSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  // Fetch posts from the API
+  const [error, setError] = useState<string | null>(null); // Fetch posts from the API
   const fetchPosts = async () => {
     try {
       setIsLoading(true);
@@ -39,6 +41,7 @@ function Home() {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         credentials: "same-origin",
         cache: "no-cache",
@@ -109,12 +112,12 @@ function Home() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-
+  
   const handleCreatePost = async (postData: any) => {
     try {
       // Create the post object to send to the API
       const postToCreate = {
-        user: "myuser", // For now, using a hardcoded username - this would come from auth later
+        user: username, // Use the actual logged-in username
         game: postData.game,
         description: postData.description,
       };
@@ -124,6 +127,7 @@ function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(postToCreate),
       });
@@ -149,13 +153,17 @@ function Home() {
   // Handle search form submission
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    setActiveSearchTerm(searchTerm);
   };
-  // Filter posts based on search term (search both user and game)
-  const filteredPosts = searchTerm
+
+  // Filter posts based on active search term (search both user and game)
+  const filteredPosts = activeSearchTerm
     ? postArray.filter(
         (post) =>
-          post.requestUser.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          post.game.toLowerCase().includes(searchTerm.toLowerCase())
+          post.requestUser
+            .toLowerCase()
+            .includes(activeSearchTerm.toLowerCase()) ||
+          post.game.toLowerCase().includes(activeSearchTerm.toLowerCase())
       )
     : postArray;
 
