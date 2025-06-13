@@ -43,6 +43,8 @@ function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [voteError, setVoteError] = useState<string | null>(null);
+  const [createPostError, setCreatePostError] = useState<string | null>(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -126,9 +128,11 @@ function Home() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
-
   // Function to handle voting
   const handleVote = async (postId: string) => {
+    // Clear any previous vote errors
+    setVoteError(null);
+
     try {
       const response = await fetch(`/api/posts/${postId}/vote`, {
         method: "POST",
@@ -159,23 +163,24 @@ function Home() {
       });
     } catch (error) {
       console.error("Error toggling vote:", error);
-      alert("Failed to toggle vote. Please try again.");
+      setVoteError("Failed to toggle vote. Please try again.");
     }
   };
-
   const handleOpenModal = () => {
+    setCreatePostError(null);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
+    setCreatePostError(null);
     setIsModalOpen(false);
   };
-
   const handleCreatePost = async (postData: any) => {
+    setCreatePostError(null);
+
     try {
-      // Create the post object to send to the API
       const postToCreate = {
-        user: username, // Use the actual logged-in username
+        user: username,
         game: postData.game,
         description: postData.description,
       };
@@ -203,7 +208,7 @@ function Home() {
       handleCloseModal();
     } catch (error) {
       console.error("Error creating post:", error);
-      alert("Failed to create post. Please try again.");
+      setCreatePostError("Failed to create post. Please try again.");
     }
   };
 
@@ -280,12 +285,26 @@ function Home() {
         >
           <IoMdAdd className={styles["search-pic"]} size={20} />
         </button>
-      </form>
+      </form>{" "}
       <CreatePost
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleCreatePost}
-      />{" "}
+      />
+      {createPostError && (
+        <div
+          style={{ color: "red", marginBottom: "1rem", textAlign: "center" }}
+        >
+          {createPostError}
+        </div>
+      )}
+      {voteError && (
+        <div
+          style={{ color: "red", marginBottom: "1rem", textAlign: "center" }}
+        >
+          {voteError}
+        </div>
+      )}
       <div className={styles["post-container"]}>
         {isLoading ? (
           <p>Loading posts...</p>

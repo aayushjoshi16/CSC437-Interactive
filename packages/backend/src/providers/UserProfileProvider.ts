@@ -67,8 +67,12 @@ export class UserProfileProvider {
 
     return result.modifiedCount > 0;
   }
-
   async addFriend(username: string, friendUsername: string): Promise<boolean> {
+    // Prevent users from adding themselves as friends
+    if (username === friendUsername) {
+      return false;
+    }
+
     // Check if friend is already in the list
     const profile = await this.getUserProfile(username);
     if (!profile || profile.friendList.includes(friendUsername)) {

@@ -7,7 +7,10 @@ export function registerUserProfileRoutes(
   userProfileProvider: UserProfileProvider
 ) {
   // Get user profile
-  app.get("/api/profile/:username", verifyAuthToken, async (req: Request, res: Response) => {
+  app.get(
+    "/api/profile/:username",
+    verifyAuthToken,
+    async (req: Request, res: Response) => {
       try {
         const { username } = req.params;
 
@@ -24,10 +27,13 @@ export function registerUserProfileRoutes(
         res.status(500).json({ error: "Failed to retrieve user profile" });
       }
     }
-  ); 
-  
+  );
+
   // Update user profile
-  app.put("/api/profile/:username", verifyAuthToken, async (req: Request, res: Response) => {
+  app.put(
+    "/api/profile/:username",
+    verifyAuthToken,
+    async (req: Request, res: Response) => {
       try {
         const { username } = req.params;
         const { email } = req.body;
@@ -64,10 +70,13 @@ export function registerUserProfileRoutes(
         res.status(500).json({ error: "Failed to update user profile" });
       }
     }
-  ); 
-  
+  );
+
   // Add friend
-  app.post("/api/profile/:username/friends", verifyAuthToken, async (req: Request, res: Response) => {
+  app.post(
+    "/api/profile/:username/friends",
+    verifyAuthToken,
+    async (req: Request, res: Response) => {
       try {
         const { username } = req.params;
         const { friendUsername } = req.body;
@@ -79,9 +88,16 @@ export function registerUserProfileRoutes(
             .json({ error: "You can only modify your own friend list" });
           return;
         }
-
         if (!friendUsername) {
           res.status(400).json({ error: "Friend username is required" });
+          return;
+        }
+
+        // Prevent users from adding themselves as friends
+        if (friendUsername === username) {
+          res
+            .status(400)
+            .json({ error: "You cannot add yourself as a friend" });
           return;
         }
 
@@ -115,10 +131,13 @@ export function registerUserProfileRoutes(
         res.status(500).json({ error: "Failed to add friend" });
       }
     }
-  ); 
-  
+  );
+
   // Remove friend
-  app.delete("/api/profile/:username/friends/:friendUsername", verifyAuthToken, async (req: Request, res: Response) => {
+  app.delete(
+    "/api/profile/:username/friends/:friendUsername",
+    verifyAuthToken,
+    async (req: Request, res: Response) => {
       try {
         const { username, friendUsername } = req.params;
 
@@ -152,9 +171,12 @@ export function registerUserProfileRoutes(
       }
     }
   );
-  
+
   // Get friends list
-  app.get("/api/profile/:username/friends", verifyAuthToken, async (req: Request, res: Response) => {
+  app.get(
+    "/api/profile/:username/friends",
+    verifyAuthToken,
+    async (req: Request, res: Response) => {
       try {
         const { username } = req.params;
 
@@ -166,9 +188,12 @@ export function registerUserProfileRoutes(
       }
     }
   );
-  
+
   // Initialize or update user profile with environment data
-  app.post("/api/profile/:username/initialize", verifyAuthToken, async (req: Request, res: Response) => {
+  app.post(
+    "/api/profile/:username/initialize",
+    verifyAuthToken,
+    async (req: Request, res: Response) => {
       try {
         const { username } = req.params;
         const { email, friendList } = req.body;

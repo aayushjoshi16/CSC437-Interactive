@@ -58,9 +58,9 @@ function Profile() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
-
   const [newFriend, setNewFriend] = useState("");
   const [showAddFriendForm, setShowAddFriendForm] = useState(false);
+  const [friendError, setFriendError] = useState<string | null>(null);
 
   // Posts state
   const [userPosts, setUserPosts] = useState<FrontendPost[]>([]);
@@ -143,12 +143,13 @@ function Profile() {
     } catch (error) {
       console.error("Error removing friend:", error);
     }
-  };
-
-  // Function to handle adding a friend
+  }; // Function to handle adding a friend
   const handleAddFriend = async (friendUsername: string) => {
     if (!currentUser || !token || friendUsername.trim() === "" || !isOwnProfile)
       return;
+
+    // Clear any previous friend errors
+    setFriendError(null);
 
     try {
       const response = await fetch(`/api/profile/${currentUser}/friends`, {
@@ -175,7 +176,9 @@ function Profile() {
       setShowAddFriendForm(false);
     } catch (error) {
       console.error("Error adding friend:", error);
-      alert(error instanceof Error ? error.message : "Failed to add friend");
+      setFriendError(
+        error instanceof Error ? error.message : "Failed to add friend"
+      );
     }
   };
 
@@ -295,7 +298,7 @@ function Profile() {
       });
     } catch (error) {
       console.error("Error toggling vote:", error);
-      alert("Failed to toggle vote. Please try again.");
+      setPostsError("Failed to toggle vote. Please try again.");
     }
   };
 
@@ -362,16 +365,19 @@ function Profile() {
           <div className={styles["friends-header"]}>
             <h2 className={styles["h2"]}>
               {isOwnProfile ? "Friends" : `${profileUsername}'s Friends`}
-            </h2>
+            </h2>{" "}
             {isOwnProfile && (
               <div
-                onClick={() => setShowAddFriendForm(!showAddFriendForm)}
+                onClick={() => {
+                  setShowAddFriendForm(!showAddFriendForm);
+                  setFriendError(null);
+                }}
                 style={{ cursor: "pointer" }}
               >
                 <CiCirclePlus size={25} />
               </div>
             )}
-          </div>
+          </div>{" "}
           {isOwnProfile && showAddFriendForm && (
             <div className={styles["add-friend-form"]}>
               <input
@@ -379,11 +385,21 @@ function Profile() {
                 value={newFriend}
                 onChange={(event) => setNewFriend(event.target.value)}
                 placeholder="Enter friend's username"
-              />
+              />{" "}
               <button onClick={() => handleAddFriend(newFriend)}>Add</button>
-              <button onClick={() => setShowAddFriendForm(false)}>
+              <button
+                onClick={() => {
+                  setShowAddFriendForm(false);
+                  setFriendError(null);
+                }}
+              >
                 Cancel
               </button>
+            </div>
+          )}
+          {friendError && (
+            <div style={{ color: "red", marginBottom: "1rem" }}>
+              {friendError}
             </div>
           )}
           <div>
