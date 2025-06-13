@@ -29,7 +29,6 @@ export function registerAuthRoutes(
 ) {
   // Route to handle user registration
   app.post("/auth/register", async (req: Request, res: Response) => {
-    console.log("Received registration request:", req.body);
     try {
       const { username, password, email } = req.body;
 
