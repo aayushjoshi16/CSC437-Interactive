@@ -6,16 +6,102 @@
     height: 100%;
     padding-top: 10rem;
     gap: 1rem;
+    position: relative;
+}
+
+.theme-toggle-container {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+    width: 3rem;
+    height: 3rem;
+}
+
+.theme-toggle:hover {
+    background-color: rgba(128, 128, 128, 0.2);
 }
 
 .login-form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    padding: 2rem;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .login-form {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .login-field {
     display: flex;
     justify-content: space-between;
     gap: 0.5rem;
+}
+
+.login-field input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    color: black;
+}
+
+body.dark-mode .login-field input {
+    background-color: #444;
+    color: white;
+    border: 1px solid #666;
+}
+
+.login-form button[type="submit"] {
+    padding: 0.75rem;
+    background-color: rgb(63, 57, 255);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-form button[type="submit"]:hover {
+    background-color: rgb(45, 39, 235);
+}
+
+.login-form button[type="submit"]:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+body.dark-mode .login-form button[type="submit"]:disabled {
+    background-color: #555;
+}
+
+.login-container h1 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.login-container p {
+    color: var(--text-color);
+}
+
+.login-field label {
+    color: var(--text-color);
 }

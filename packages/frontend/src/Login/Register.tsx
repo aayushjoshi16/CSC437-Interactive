@@ -2,9 +2,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useActionState } from "react";
 import styles from "./Login.module.css";
 import { handleAuthRequest } from "../utils/authUtils";
+import { useTheme } from "../ThemeContext";
 
 function Register() {
   const navigate = useNavigate();
+  const { darkMode, toggleDarkMode } = useTheme();
 
   const [result, submitAction, isPending] = useActionState(
     async (_prevState: any, formData: FormData) => {
@@ -26,6 +28,15 @@ function Register() {
 
   return (
     <main className={styles["login-container"]}>
+      <div className={styles["theme-toggle-container"]}>
+        <button
+          onClick={toggleDarkMode}
+          className={styles["theme-toggle"]}
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {darkMode ? "☀️" : "🌙"}
+        </button>
+      </div>
       <h1>Register</h1>
       <form className={styles["login-form"]} action={submitAction}>
         {result?.message && <p style={{ color: "green" }}>{result.message}</p>}

@@ -1,5 +1,4 @@
 import { Link, Outlet } from "react-router-dom";
-import { useEffect } from "react";
 import styles from "./Navbar.module.css";
 import { useTheme } from "../ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -9,15 +8,6 @@ import { FaUser } from "react-icons/fa";
 function Navbar() {
   const { darkMode, toggleDarkMode } = useTheme();
   const { logout, username } = useAuth();
-
-  // Apply dark mode class to body
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
-  }, [darkMode]);
 
   return (
     <>

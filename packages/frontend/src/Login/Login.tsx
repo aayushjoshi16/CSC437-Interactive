@@ -3,11 +3,13 @@ import { useActionState } from "react";
 import styles from "./Login.module.css";
 import { handleAuthRequest } from "../utils/authUtils";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../ThemeContext";
 
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const { darkMode, toggleDarkMode } = useTheme();
 
   const [result, submitAction, isPending] = useActionState(
     async (_prevState: any, formData: FormData) => {
@@ -33,6 +35,15 @@ function Login() {
 
   return (
     <main className={styles["login-container"]}>
+      <div className={styles["theme-toggle-container"]}>
+        <button
+          onClick={toggleDarkMode}
+          className={styles["theme-toggle"]}
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {darkMode ? "☀️" : "🌙"}
+        </button>
+      </div>
       <h1>Login</h1>
       <form className={styles["login-form"]} action={submitAction}>
         <div className={styles["login-field"]}>

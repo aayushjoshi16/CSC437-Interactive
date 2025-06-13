@@ -5,6 +5,7 @@ import Navbar from "./Navbar/Navbar";
 import { ThemeProvider } from "./ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute, AuthRedirect } from "./components/ProtectedRoute";
+import { ThemeApplier } from "./components/ThemeApplier";
 import Login from "./Login/Login";
 import Register from "./Login/Register";
 import { ValidRoutes } from "@backend/shared/ValidRoutes";
@@ -13,6 +14,7 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <ThemeApplier />
         <Routes>
 
           {/* Login and Register - redirect if already authenticated */}
