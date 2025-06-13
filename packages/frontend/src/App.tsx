@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./Home/Home";
 import Profile from "./Profile/Profile";
 import Navbar from "./Navbar/Navbar";
+import NotFound from "./NotFound/NotFound";
 import { ThemeProvider } from "./ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute, AuthRedirect } from "./components/ProtectedRoute";
@@ -51,7 +52,13 @@ function App() {
             <Route path={ValidRoutes.HOME} element={<Home />} />
             <Route path={ValidRoutes.PROFILE} element={<Profile />} />
             <Route path={ValidRoutes.PROFILE_USER} element={<Profile />} />
+            
+            {/* 404 for unknown routes */}
+            <Route path="*" element={<NotFound />} />
           </Route>
+          
+          {/* 404 for unknown routes */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </ThemeProvider>
