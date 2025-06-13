@@ -7,7 +7,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute, AuthRedirect } from "./components/ProtectedRoute";
 import Login from "./Login/Login";
 import Register from "./Login/Register";
-import FriendProfile from "./Profile/FriendProfile";
 import { ValidRoutes } from "@backend/shared/ValidRoutes";
 
 function App() {
@@ -15,7 +14,8 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Routes>
-          {/* Login and Register routes outside the Navbar - redirect if already authenticated */}
+
+          {/* Login and Register - redirect if already authenticated */}
           <Route
             path={ValidRoutes.LOGIN}
             element={
@@ -48,7 +48,7 @@ function App() {
             {/* Other protected routes inside Navbar */}
             <Route path={ValidRoutes.HOME} element={<Home />} />
             <Route path={ValidRoutes.PROFILE} element={<Profile />} />
-            <Route path={ValidRoutes.FRIENDS} element={<FriendProfile />} />
+            <Route path={ValidRoutes.PROFILE_USER} element={<Profile />} />
           </Route>
         </Routes>
       </AuthProvider>

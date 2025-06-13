@@ -44,7 +44,7 @@ app.locals.JWT_SECRET = JWT_SECRET;
     userProfileProvider = new UserProfileProvider(mongoClient);
 
     console.log("MongoDB connection established successfully."); // Register routes after successful MongoDB connection
-    
+
     registerAuthRoutes(app, credentialsProvider, userProfileProvider);
     registerPostRoutes(app, postProvider);
     registerUserProfileRoutes(app, userProfileProvider);

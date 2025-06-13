@@ -3,5 +3,5 @@ export const ValidRoutes = {
   LOGIN: "/login",
   REGISTER: "/register",
   PROFILE: "/profile",
-  FRIENDS: "/friends/:username",
+  PROFILE_USER: "/profile/:username",
 };

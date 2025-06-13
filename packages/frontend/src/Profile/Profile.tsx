@@ -1,5 +1,5 @@
 import styles from "./Profile.module.css";
-import { Link } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { CiCirclePlus } from "react-icons/ci";
 import { useAuth } from "../contexts/AuthContext";
@@ -35,7 +35,21 @@ interface UserProfile {
 }
 
 function Profile() {
-  const { username, token } = useAuth();
+  const { username: currentUser, token } = useAuth();
+  const { username: urlUsername } = useParams();
+  const navigate = useNavigate();
+
+  // Redirect to /profile if current user visits their own profile via /profile/<username>
+  useEffect(() => {
+    if (urlUsername && currentUser && urlUsername === currentUser) {
+      navigate("/profile", { replace: true });
+      return;
+    }
+  }, [urlUsername, currentUser, navigate]);
+
+  // Determine which user's profile to display
+  const profileUsername = urlUsername || currentUser;
+  const isOwnProfile = !urlUsername || urlUsername === currentUser;
 
   // Profile state
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -55,10 +69,11 @@ function Profile() {
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [totalPosts, setTotalPosts] = useState(0);
+
   // Function to fetch user profile
   const fetchUserProfile = async () => {
-    if (!username || !token) {
-      setProfileError("You must be logged in to view your profile");
+    if (!profileUsername || !token) {
+      setProfileError("You must be logged in to view profiles");
       setIsLoadingProfile(false);
       return;
     }
@@ -67,7 +82,7 @@ function Profile() {
       setIsLoadingProfile(true);
       setProfileError(null);
 
-      const response = await fetch(`/api/profile/${username}`, {
+      const response = await fetch(`/api/profile/${profileUsername}`, {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -98,11 +113,11 @@ function Profile() {
 
   // Function to handle removing a friend
   const handleRemoveFriend = async (friendUsername: string) => {
-    if (!username || !token) return;
+    if (!currentUser || !token || !isOwnProfile) return;
 
     try {
       const response = await fetch(
-        `/api/profile/${username}/friends/${friendUsername}`,
+        `/api/profile/${currentUser}/friends/${friendUsername}`,
         {
           method: "DELETE",
           headers: {
@@ -129,10 +144,11 @@ function Profile() {
 
   // Function to handle adding a friend
   const handleAddFriend = async (friendUsername: string) => {
-    if (!username || !token || friendUsername.trim() === "") return;
+    if (!currentUser || !token || friendUsername.trim() === "" || !isOwnProfile)
+      return;
 
     try {
-      const response = await fetch(`/api/profile/${username}/friends`, {
+      const response = await fetch(`/api/profile/${currentUser}/friends`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -162,8 +178,8 @@ function Profile() {
 
   // Function to fetch user posts with pagination
   const fetchUserPosts = async (page = currentPage, limit = pageSize) => {
-    if (!username || !token) {
-      setPostsError("You must be logged in to view your posts");
+    if (!profileUsername || !token) {
+      setPostsError("You must be logged in to view posts");
       setIsLoadingPosts(false);
       return;
     }
@@ -177,7 +193,7 @@ function Profile() {
       });
 
       const response = await fetch(
-        `/api/posts/user/${username}?${params.toString()}`,
+        `/api/posts/user/${profileUsername}?${params.toString()}`,
         {
           method: "GET",
           headers: {
@@ -195,7 +211,6 @@ function Profile() {
           `Failed to fetch posts: ${response.status} ${response.statusText}`
         );
       }
-
       const paginatedData: PaginatedResponse = await response.json();
       const transformedPosts: FrontendPost[] = paginatedData.data.map(
         (post) => ({
@@ -204,7 +219,7 @@ function Profile() {
           game: post.game,
           description: post.description,
           votes: post.votes.length,
-          voted: post.votes.includes(username || ""), // Check if current user has voted
+          voted: post.votes.includes(currentUser || ""), // Check if current user has voted
           timestamp: new Date(post.timestamp),
         })
       );
@@ -222,14 +237,14 @@ function Profile() {
       setIsLoadingPosts(false);
     }
   };
-  
+
   // Fetch user profile and posts on component mount
   useEffect(() => {
-    if (username) {
+    if (profileUsername) {
       fetchUserProfile();
       fetchUserPosts();
     }
-  }, [username, token]);
+  }, [profileUsername, urlUsername, token]);
 
   // Function to handle page changes for posts
   const handlePageChange = (newPage: number) => {
@@ -319,6 +334,7 @@ function Profile() {
       </div>
     );
   };
+
   return (
     <main className={styles["main"]}>
       {/* Profile picture, username and email */}
@@ -327,10 +343,9 @@ function Profile() {
           className={styles["profile-pic"]}
           src="/profile.png"
           alt="Profile"
-        />
-
+        />{" "}
         <div className={styles["profile-info"]}>
-          <p>Username: {username}</p>
+          <p>Username: {profileUsername}</p>
           {isLoadingProfile ? (
             <p>Loading profile...</p>
           ) : profileError ? (
@@ -344,17 +359,21 @@ function Profile() {
       {/* Friends section */}
       <div className={styles.container}>
         <div className={styles["post-container"]}>
+          {" "}
           <div className={styles["friends-header"]}>
-            <h2 className={styles["h2"]}>Friends</h2>
-            <div
-              onClick={() => setShowAddFriendForm(!showAddFriendForm)}
-              style={{ cursor: "pointer" }}
-            >
-              <CiCirclePlus size={25} />
-            </div>
+            <h2 className={styles["h2"]}>
+              {isOwnProfile ? "Friends" : `${profileUsername}'s Friends`}
+            </h2>
+            {isOwnProfile && (
+              <div
+                onClick={() => setShowAddFriendForm(!showAddFriendForm)}
+                style={{ cursor: "pointer" }}
+              >
+                <CiCirclePlus size={25} />
+              </div>
+            )}
           </div>
-
-          {showAddFriendForm && (
+          {isOwnProfile && showAddFriendForm && (
             <div className={styles["add-friend-form"]}>
               <input
                 type="text"
@@ -368,7 +387,6 @@ function Profile() {
               </button>
             </div>
           )}
-
           <div>
             {isLoadingProfile ? (
               <p>Loading friends...</p>
@@ -379,13 +397,15 @@ function Profile() {
                 <div key={index} className={styles["friend-entry"]}>
                   <p>{friendUsername}</p>
                   <div>
-                    <img
-                      className={styles["friend-actions"]}
-                      src="/trash.png"
-                      alt="Delete Friend"
-                      onClick={() => handleRemoveFriend(friendUsername)}
-                    />
-                    <Link to={`/friends/${friendUsername}`}>
+                    {isOwnProfile && (
+                      <img
+                        className={styles["friend-actions"]}
+                        src="/trash.png"
+                        alt="Delete Friend"
+                        onClick={() => handleRemoveFriend(friendUsername)}
+                      />
+                    )}{" "}
+                    <Link to={`/profile/${friendUsername}`}>
                       <img
                         className={styles["friend-actions"]}
                         src="/link.png"
@@ -398,10 +418,10 @@ function Profile() {
             )}
           </div>
         </div>
-
+        
         {/* Post section */}
         <div id="user-posts-section" className={styles["post-container"]}>
-          <h2>My Posts</h2>
+          <h2>{isOwnProfile ? "My Posts" : `${profileUsername}'s Posts`}</h2>
           {isLoadingPosts ? (
             <p>Loading posts...</p>
           ) : postsError ? (
