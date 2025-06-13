@@ -5,11 +5,10 @@ import { MongoClient } from "mongodb";
 import { connectMongo } from "./connectMongo";
 import { PostProvider } from "./providers/PostProvider";
 import { CredentialsProvider } from "./providers/CredentialsProvider";
+import { UserProfileProvider } from "./providers/UserProfileProvider";
 import { registerPostRoutes } from "./routes/postRoutes";
 import { registerAuthRoutes } from "./routes/authRoutes";
-import { registerImageRoutes } from "./routes/imageRoutes";
-import { verifyAuthToken } from "./middleware/authMiddleware";
-
+import { registerUserProfileRoutes } from "./routes/userProfileRoutes";
 import { ValidRoutes } from "./shared/ValidRoutes";
 
 dotenv.config(); // Read the .env file in the current working directory, and load values into process.env.
@@ -28,6 +27,7 @@ if (!JWT_SECRET) {
 let mongoClient: MongoClient;
 let postProvider: PostProvider;
 let credentialsProvider: CredentialsProvider;
+let userProfileProvider: UserProfileProvider;
 
 const app = express();
 app.use(express.json());
@@ -41,11 +41,13 @@ app.locals.JWT_SECRET = JWT_SECRET;
     mongoClient = await connectMongo();
     postProvider = new PostProvider(mongoClient);
     credentialsProvider = new CredentialsProvider(mongoClient);
+    userProfileProvider = new UserProfileProvider(mongoClient);
+
     console.log("MongoDB connection established successfully."); // Register routes after successful MongoDB connection
-    app.use("/api/*", verifyAuthToken);
+    
+    registerAuthRoutes(app, credentialsProvider, userProfileProvider);
     registerPostRoutes(app, postProvider);
-    registerAuthRoutes(app, credentialsProvider);
-    registerImageRoutes(app);
+    registerUserProfileRoutes(app, userProfileProvider);
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
     process.exit(1);

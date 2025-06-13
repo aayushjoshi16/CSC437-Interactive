@@ -1,5 +1,6 @@
 import { Express, Request, Response } from "express";
 import { CredentialsProvider } from "../providers/CredentialsProvider";
+import { UserProfileProvider } from "../providers/UserProfileProvider";
 import jwt from "jsonwebtoken";
 
 export interface IAuthTokenPayload {
@@ -23,13 +24,14 @@ function generateAuthToken(
 
 export function registerAuthRoutes(
   app: Express,
-  credentialsProvider: CredentialsProvider
+  credentialsProvider: CredentialsProvider,
+  userProfileProvider: UserProfileProvider
 ) {
   // Route to handle user registration
   app.post("/auth/register", async (req: Request, res: Response) => {
     console.log("Received registration request:", req.body);
     try {
-      const { username, password } = req.body;
+      const { username, password, email } = req.body;
 
       if (!username || !password) {
         res.status(400).json({ error: "Username and password are required" });
@@ -42,9 +44,13 @@ export function registerAuthRoutes(
       );
 
       if (success) {
+        // Create user profile after successful registration
+        await userProfileProvider.createUserProfile(username, email);
         res.status(201).json({ message: "User registered successfully" });
       } else {
-        res.status(409).json({ error: "User with this username already exists" });
+        res
+          .status(409)
+          .json({ error: "User with this username already exists" });
       }
     } catch (error) {
       console.error("Error registering user:", error);

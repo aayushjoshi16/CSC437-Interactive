@@ -1,5 +1,3 @@
-// Authentication utility functions
-
 export interface AuthResult {
   success?: boolean;
   error?: string;
@@ -15,12 +13,12 @@ export async function handleAuthRequest(
 ): Promise<AuthResult> {
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
+  const email = formData.get("email") as string;
 
   if (!username || !password) {
     return { error: "Username and password are required" };
   }
 
-  // Additional validation for registration
   if (isRegistering) {
     const confirmPassword = formData.get("confirmPassword") as string;
     if (password !== confirmPassword) {
@@ -29,12 +27,17 @@ export async function handleAuthRequest(
   }
 
   try {
+    const body: any = { username, password };
+    if (isRegistering && email) {
+      body.email = email;
+    }
+
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();

@@ -25,12 +25,23 @@ interface PaginatedResponse {
   totalPages: number;
 }
 
+// Interface for user profile
+interface UserProfile {
+  username: string;
+  email: string;
+  friendList: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 function Profile() {
   const { username, token } = useAuth();
-  const [friends, setFriends] = useState([
-    { username: "john190", id: 1 },
-    { username: "anon65", id: 2 },
-  ]);
+
+  // Profile state
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [profileError, setProfileError] = useState<string | null>(null);
+
   const [newFriend, setNewFriend] = useState("");
   const [showAddFriendForm, setShowAddFriendForm] = useState(false);
 
@@ -44,25 +55,109 @@ function Profile() {
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize, setPageSize] = useState(5);
   const [totalPosts, setTotalPosts] = useState(0);
+  // Function to fetch user profile
+  const fetchUserProfile = async () => {
+    if (!username || !token) {
+      setProfileError("You must be logged in to view your profile");
+      setIsLoadingProfile(false);
+      return;
+    }
+
+    try {
+      setIsLoadingProfile(true);
+      setProfileError(null);
+
+      const response = await fetch(`/api/profile/${username}`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "same-origin",
+        cache: "no-cache",
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch profile: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const profile: UserProfile = await response.json();
+      setUserProfile(profile);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch profile";
+      setProfileError(errorMessage);
+      console.error("Error fetching user profile:", err);
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
 
   // Function to handle removing a friend
-  const handleRemoveFriend = (friendId: number) => {
-    setFriends((prevFriends) =>
-      prevFriends.filter((friend) => friend.id !== friendId)
-    );
+  const handleRemoveFriend = async (friendUsername: string) => {
+    if (!username || !token) return;
+
+    try {
+      const response = await fetch(
+        `/api/profile/${username}/friends/${friendUsername}`,
+        {
+          method: "DELETE",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "same-origin",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to remove friend");
+      }
+
+      const data = await response.json();
+      setUserProfile((prev) =>
+        prev ? { ...prev, friendList: data.friendList } : null
+      );
+    } catch (error) {
+      console.error("Error removing friend:", error);
+    }
   };
 
   // Function to handle adding a friend
-  const handleAddFriend = (newFriend: string) => {
-    if (newFriend.trim() === "") return;
+  const handleAddFriend = async (friendUsername: string) => {
+    if (!username || !token || friendUsername.trim() === "") return;
 
-    const newFriendObj = {
-      username: newFriend,
-      id: friends.length + 1,
-    };
-    setFriends((prevFriends) => [...prevFriends, newFriendObj]);
-    setNewFriend("");
-    setShowAddFriendForm(false);
+    try {
+      const response = await fetch(`/api/profile/${username}/friends`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "same-origin",
+        body: JSON.stringify({ friendUsername }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add friend");
+      }
+
+      const data = await response.json();
+      setUserProfile((prev) =>
+        prev ? { ...prev, friendList: data.friendList } : null
+      );
+      setNewFriend("");
+      setShowAddFriendForm(false);
+    } catch (error) {
+      console.error("Error adding friend:", error);
+      alert(error instanceof Error ? error.message : "Failed to add friend");
+    }
   };
 
   // Function to fetch user posts with pagination
@@ -127,10 +222,11 @@ function Profile() {
       setIsLoadingPosts(false);
     }
   };
-
-  // Fetch user posts on component mount
+  
+  // Fetch user profile and posts on component mount
   useEffect(() => {
     if (username) {
+      fetchUserProfile();
       fetchUserPosts();
     }
   }, [username, token]);
@@ -223,10 +319,9 @@ function Profile() {
       </div>
     );
   };
-
   return (
     <main className={styles["main"]}>
-      {/* Profile picture, username and password */}
+      {/* Profile picture, username and email */}
       <div className={styles["profile-container"]}>
         <img
           className={styles["profile-pic"]}
@@ -236,7 +331,13 @@ function Profile() {
 
         <div className={styles["profile-info"]}>
           <p>Username: {username}</p>
-          <p>Password: ******</p>
+          {isLoadingProfile ? (
+            <p>Loading profile...</p>
+          ) : profileError ? (
+            <p style={{ color: "red" }}>Error: {profileError}</p>
+          ) : userProfile ? (
+            <p>Email: {userProfile.email || "Not set"}</p>
+          ) : null}
         </div>
       </div>
 
@@ -269,20 +370,22 @@ function Profile() {
           )}
 
           <div>
-            {friends.length === 0 ? (
+            {isLoadingProfile ? (
+              <p>Loading friends...</p>
+            ) : !userProfile || userProfile.friendList.length === 0 ? (
               <p>No friends</p>
             ) : (
-              friends.map((friend) => (
-                <div key={friend.id} className={styles["friend-entry"]}>
-                  <p>{friend.username}</p>
+              userProfile.friendList.map((friendUsername, index) => (
+                <div key={index} className={styles["friend-entry"]}>
+                  <p>{friendUsername}</p>
                   <div>
                     <img
                       className={styles["friend-actions"]}
                       src="/trash.png"
                       alt="Delete Friend"
-                      onClick={() => handleRemoveFriend(friend.id)}
+                      onClick={() => handleRemoveFriend(friendUsername)}
                     />
-                    <Link to={`/friends/${friend.username}`}>
+                    <Link to={`/friends/${friendUsername}`}>
                       <img
                         className={styles["friend-actions"]}
                         src="/link.png"
