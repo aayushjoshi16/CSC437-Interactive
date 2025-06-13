@@ -45,7 +45,7 @@ function Navbar() {
             className={styles["logout-button"]}
             aria-label="Logout"
           >
-            Logout
+            Log out
           </button>
         </div>
       </nav>
