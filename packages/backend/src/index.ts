@@ -48,6 +48,18 @@ app.locals.JWT_SECRET = JWT_SECRET;
     registerAuthRoutes(app, credentialsProvider, userProfileProvider);
     registerPostRoutes(app, postProvider);
     registerUserProfileRoutes(app, userProfileProvider);
+
+    // Catch-all route handler
+    app.get("*", (req: Request, res: Response) => {
+      if (req.path.startsWith("/api/")) {
+        res.status(404).json({ error: "API endpoint not found" });
+        return;
+      }
+      
+      const indexPath = path.join(__dirname, "../../frontend/dist/index.html");
+      res.sendFile(indexPath);
+    });
+
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
     process.exit(1);
