@@ -93,23 +93,6 @@ export function registerUserProfileRoutes(
           return;
         }
 
-        // Prevent users from adding themselves as friends
-        if (friendUsername === username) {
-          res
-            .status(400)
-            .json({ error: "You cannot add yourself as a friend" });
-          return;
-        }
-
-        // Check if the friend exists
-        const friendProfile = await userProfileProvider.getUserProfile(
-          friendUsername
-        );
-        if (!friendProfile) {
-          res.status(404).json({ error: "Friend user not found" });
-          return;
-        }
-
         const success = await userProfileProvider.addFriend(
           username,
           friendUsername
@@ -118,7 +101,10 @@ export function registerUserProfileRoutes(
         if (!success) {
           res
             .status(409)
-            .json({ error: "Friend already exists or user not found" });
+            .json({
+              error:
+                "Friend already exists, user not found, or cannot add yourself as friend",
+            });
           return;
         }
 

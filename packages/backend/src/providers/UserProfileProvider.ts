@@ -79,7 +79,14 @@ export class UserProfileProvider {
       return false;
     }
 
-    const result = await this.collection.updateOne(
+    // Check if the friend user exists
+    const friendProfile = await this.getUserProfile(friendUsername);
+    if (!friendProfile) {
+      return false;
+    }
+
+    // Add friend to user's friend list
+    const result1 = await this.collection.updateOne(
       { username },
       {
         $addToSet: { friendList: friendUsername },
@@ -87,14 +94,23 @@ export class UserProfileProvider {
       }
     );
 
-    return result.modifiedCount > 0;
-  }
+    // Add user to friend's friend list (bidirectional friendship)
+    const result2 = await this.collection.updateOne(
+      { username: friendUsername },
+      {
+        $addToSet: { friendList: username },
+        $set: { updatedAt: new Date() },
+      }
+    );
 
+    return result1.modifiedCount > 0 && result2.modifiedCount > 0;
+  }
   async removeFriend(
     username: string,
     friendUsername: string
   ): Promise<boolean> {
-    const result = await this.collection.updateOne(
+    // Remove friend from user's friend list
+    const result1 = await this.collection.updateOne(
       { username },
       {
         $pull: { friendList: friendUsername },
@@ -102,7 +118,16 @@ export class UserProfileProvider {
       }
     );
 
-    return result.modifiedCount > 0;
+    // Remove user from friend's friend list (bidirectional friendship)
+    const result2 = await this.collection.updateOne(
+      { username: friendUsername },
+      {
+        $pull: { friendList: username },
+        $set: { updatedAt: new Date() },
+      }
+    );
+
+    return result1.modifiedCount > 0 || result2.modifiedCount > 0;
   }
 
   async getFriendsList(username: string): Promise<string[]> {

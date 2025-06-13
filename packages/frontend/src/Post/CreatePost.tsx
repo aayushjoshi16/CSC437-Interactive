@@ -68,12 +68,11 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
       const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`);
 
       const formattedStartDate = formatTimestamp(startDateTime);
-      const formattedEndDate = formatTimestamp(endDateTime);
-
-      // Combine the description with the formatted date/time information
-      const fullDescription =
-        formData.description +
-        `. From ${formattedStartDate} to ${formattedEndDate}!`;
+      const formattedEndDate = formatTimestamp(endDateTime);      // Combine the description with the formatted date/time information
+      const dateTimeInfo = ` From ${formattedStartDate} to ${formattedEndDate}!`;
+      const fullDescription = formData.description 
+        ? formData.description + dateTimeInfo
+        : dateTimeInfo.trim();
 
       const postData = {
         game: formData.game,
@@ -145,17 +144,15 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
               {formData.game.length}/50 characters
             </small>
           </div>          <div className={styles["post-entry"]}>
-            <label htmlFor="description">Description:</label>
+            <label htmlFor="description">Description (optional):</label>
             <textarea
               id="description"
               name="description"
               rows={2}
               value={formData.description}
               onChange={handleChange}
-              placeholder="Enter your message here"
+              placeholder="Enter your message here (optional)"
               maxLength={200}
-              required
-              aria-required="true"
             ></textarea>
             <small style={{ color: formData.description.length > 180 ? '#ff6b6b' : '#666', fontSize: '0.8rem' }}>
               {formData.description.length}/200 characters
