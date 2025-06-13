@@ -1,11 +1,15 @@
 :root {
   --text-color: #000;
   --background-color: #fff;
+  --link-color: #0066cc;
+  --link-hover-color: #004499;
 }
 
 body.dark-mode {
   --text-color: #fff;
   --background-color: #333;
+  --link-color: #66b3ff;
+  --link-hover-color: #99ccff;
   color: var(--text-color);
   background-color: var(--background-color);
 }
@@ -19,4 +23,11 @@ body {
 body.dark-mode .dark-mode-enable {
   color: var(--text-color);
   background-color: var(--background-color);
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  text-decoration: underline;
 }

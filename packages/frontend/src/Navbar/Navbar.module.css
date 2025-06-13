@@ -37,6 +37,16 @@
   height: 2rem;
   width: 2rem;
   border-radius: 50%;
+  color: black !important;
+}
+
+.profile-link {
+  color: black !important;
+  text-decoration: none;
+}
+
+.profile-link:hover {
+  color: black !important;
 }
 
 .nav-controls {
