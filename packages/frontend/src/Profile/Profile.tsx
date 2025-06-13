@@ -2,6 +2,9 @@ import styles from "./Profile.module.css";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { CiCirclePlus } from "react-icons/ci";
+import { MdDelete } from "react-icons/md";
+import { FiExternalLink } from "react-icons/fi";
+import { FaUserCircle } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 import PostEntry from "../Post/PostEntry";
 import type { FrontendPost } from "../Home/Home";
@@ -337,13 +340,10 @@ function Profile() {
 
   return (
     <main className={styles["main"]}>
+      {" "}
       {/* Profile picture, username and email */}
       <div className={styles["profile-container"]}>
-        <img
-          className={styles["profile-pic"]}
-          src="/profile.png"
-          alt="Profile"
-        />{" "}
+        <FaUserCircle className={styles["profile-pic"]} size={160} />
         <div className={styles["profile-info"]}>
           <p>Username: {profileUsername}</p>
           {isLoadingProfile ? (
@@ -355,7 +355,6 @@ function Profile() {
           ) : null}
         </div>
       </div>
-
       {/* Friends section */}
       <div className={styles.container}>
         <div className={styles["post-container"]}>
@@ -395,21 +394,21 @@ function Profile() {
             ) : (
               userProfile.friendList.map((friendUsername, index) => (
                 <div key={index} className={styles["friend-entry"]}>
-                  <p>{friendUsername}</p>
+                  <p>{friendUsername}</p>{" "}
                   <div>
                     {isOwnProfile && (
-                      <img
+                      <MdDelete
                         className={styles["friend-actions"]}
-                        src="/trash.png"
-                        alt="Delete Friend"
+                        size={20}
                         onClick={() => handleRemoveFriend(friendUsername)}
+                        style={{ cursor: "pointer" }}
                       />
                     )}{" "}
                     <Link to={`/profile/${friendUsername}`}>
-                      <img
+                      <FiExternalLink
                         className={styles["friend-actions"]}
-                        src="/link.png"
-                        alt="Visit Profile"
+                        size={20}
+                        style={{ cursor: "pointer" }}
                       />
                     </Link>
                   </div>
@@ -418,7 +417,7 @@ function Profile() {
             )}
           </div>
         </div>
-        
+
         {/* Post section */}
         <div id="user-posts-section" className={styles["post-container"]}>
           <h2>{isOwnProfile ? "My Posts" : `${profileUsername}'s Posts`}</h2>

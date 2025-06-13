@@ -36,6 +36,8 @@
   height: 10rem;
   width: 10rem;
   padding-left: 0.5rem;
+  color: #6b7280;
+  flex-shrink: 0;
 }
 
 /* Posts */
@@ -82,7 +84,8 @@
   border: 5px solid #3083ff;
   border-radius: 15px;
   padding: 1.5rem;
-  width: 100%;
+  width: 80%;
+  min-width: 20rem;
   box-sizing: border-box;
 }
 
@@ -165,19 +168,20 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .post-container {
     padding: 1rem;
-    width: 100%;
+    width: 80%;
+    min-width: 20rem;
   }
 
   .profile-container {
     flex-direction: column;
     text-align: center;
   }
-
-  .profile-info {
-    padding-left: 0;
-    margin-top: 1rem;
-  }
+  
+    .profile-info {
+      padding-left: 0;
+      margin-top: 1rem;
+    }
 }

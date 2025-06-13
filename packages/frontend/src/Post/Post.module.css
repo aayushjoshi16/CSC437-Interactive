@@ -162,6 +162,26 @@
   cursor: not-allowed;
 }
 
+/* Text wrapping for post content */
+.post p {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.4;
+  margin: 0.5rem 0;
+}
+
+/* Specific styling for game and description text */
+.post p:nth-child(3) {
+  font-weight: bold;
+  word-break: break-word;
+}
+
+.post p:nth-child(4) {
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
 @media (max-width: 600px) {
   .modal-content {
     max-width: 25rem;

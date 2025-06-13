@@ -1,26 +1,14 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link, Outlet } from "react-router-dom";
+import { useEffect } from "react";
 import styles from "./Navbar.module.css";
 import { useTheme } from "../ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
+import { IoHome } from "react-icons/io5";
+import { FaUser } from "react-icons/fa";
 
 function Navbar() {
   const { darkMode, toggleDarkMode } = useTheme();
   const { logout, username } = useAuth();
-  const [imageName, setImageName] = useState("profile.png");
-  const [redirectPath, setRedirectPath] = useState("/profile");
-  const location = useLocation();
-
-  // Set the initial image based on the current path
-  useEffect(() => {
-    if (location.pathname === "/profile") {
-      setImageName("home.png");
-      setRedirectPath("/home");
-    } else {
-      setImageName("profile.png");
-      setRedirectPath("/profile");
-    }
-  }, [location.pathname]);
 
   // Apply dark mode class to body
   useEffect(() => {
@@ -47,17 +35,21 @@ function Navbar() {
             }
           >
             {darkMode ? "☀️" : "🌙"}
-          </button>
-          <Link to={redirectPath} className={styles["profile-link"]}>
-            <img
-              className={styles["profile-pic"]}
-              src={`../public/${imageName}`}
-              alt={`Visit ${
-                imageName === "home.png" ? "home" : "profile"
-              } page`}
-            />
+          </button>{" "}
+          <Link
+            to="/home"
+            className={styles["profile-link"]}
+            title="Go to Home"
+          >
+            <IoHome className={styles["profile-pic"]} size={24} />
           </Link>
-
+          <Link
+            to="/profile"
+            className={styles["profile-link"]}
+            title="Go to Profile"
+          >
+            <FaUser className={styles["profile-pic"]} size={20} />
+          </Link>
           <button
             onClick={logout}
             className={styles["logout-button"]}

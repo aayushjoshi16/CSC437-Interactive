@@ -3,6 +3,8 @@ import styles from "./Home.module.css";
 import PostEntry from "../Post/PostEntry";
 import CreatePost from "../Post/CreatePost";
 import { useAuth } from "../contexts/AuthContext";
+import { IoSearch } from "react-icons/io5";
+import { IoMdAdd } from "react-icons/io";
 
 // Interface for the API response format
 interface ApiPost {
@@ -49,19 +51,23 @@ function Home() {
   const [totalPosts, setTotalPosts] = useState(0);
 
   // Fetch posts from the API with pagination and search
-  const fetchPosts = async (page = currentPage, limit = pageSize, search = searchTerm) => {
+  const fetchPosts = async (
+    page = currentPage,
+    limit = pageSize,
+    search = searchTerm
+  ) => {
     try {
       setIsLoading(true);
-      
+
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
       });
-      
+
       if (search) {
-        params.append('search', search);
+        params.append("search", search);
       }
-      
+
       const response = await fetch(`/api/posts?${params.toString()}`, {
         method: "GET",
         headers: {
@@ -80,15 +86,17 @@ function Home() {
       }
 
       const paginatedData: PaginatedResponse = await response.json();
-      const transformedPosts: FrontendPost[] = paginatedData.data.map((post) => ({
-        id: post._id,
-        requestUser: post.user,
-        game: post.game,
-        description: post.description,
-        votes: post.votes.length,
-        voted: post.votes.includes(username || ""), // Check if current user has voted
-        timestamp: new Date(post.timestamp),
-      }));
+      const transformedPosts: FrontendPost[] = paginatedData.data.map(
+        (post) => ({
+          id: post._id,
+          requestUser: post.user,
+          game: post.game,
+          description: post.description,
+          votes: post.votes.length,
+          voted: post.votes.includes(username || ""), // Check if current user has voted
+          timestamp: new Date(post.timestamp),
+        })
+      );
 
       setPostArray(transformedPosts);
       setTotalPages(paginatedData.totalPages);
@@ -187,7 +195,7 @@ function Home() {
           `Failed to create post: ${response.status} ${response.statusText}`
         );
       }
-   
+
       setCurrentPage(1);
       await fetchPosts(1, pageSize, searchTerm);
 
@@ -261,23 +269,16 @@ function Home() {
           className={styles["input"]}
           value={searchTerm}
           onChange={handleSearchChange}
-        />        <button type="submit">
-          <img
-            className={styles["search-pic"]}
-            src="/search.png"
-            alt="Search"
-          />
-        </button>
+        />{" "}
+        <button type="submit">
+          <IoSearch className={styles["search-pic"]} size={20} />
+        </button>{" "}
         <button
           type="button"
           className={styles["create-post-button"]}
           onClick={handleOpenModal}
         >
-          <img
-            className={styles["search-pic"]}
-            src="/add.png"
-            alt="Create a post"
-          />
+          <IoMdAdd className={styles["search-pic"]} size={20} />
         </button>
       </form>
       <CreatePost
@@ -287,10 +288,15 @@ function Home() {
       />{" "}
       <div className={styles["post-container"]}>
         {isLoading ? (
-          <p>Loading posts...</p>        ) : error ? (
+          <p>Loading posts...</p>
+        ) : error ? (
           <div>
             <p>{error}</p>
-            <button onClick={() => fetchPosts(currentPage, pageSize, searchTerm)}>Retry</button>
+            <button
+              onClick={() => fetchPosts(currentPage, pageSize, searchTerm)}
+            >
+              Retry
+            </button>
           </div>
         ) : postArray.length === 0 ? (
           <p>
@@ -309,7 +315,6 @@ function Home() {
           ))
         )}
       </div>
-
       {/* Pagination controls at the bottom */}
       {!isLoading && !error && totalPages > 1 && renderPaginationControls()}
     </main>

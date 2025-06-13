@@ -41,11 +41,21 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    
+    // Enforce character limits
+    let limitedValue = value;
+    if (name === "game" && value.length > 50) {
+      limitedValue = value.slice(0, 50);
+    } else if (name === "description" && value.length > 200) {
+      limitedValue = value.slice(0, 200);
+    }
+    
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: limitedValue,
     }));
   };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -118,8 +128,7 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
           </button>
         </div>
 
-        <form className={styles["modal-container"]} onSubmit={handleSubmit}>
-          <div className={styles["post-entry"]}>
+        <form className={styles["modal-container"]} onSubmit={handleSubmit}>          <div className={styles["post-entry"]}>
             <label htmlFor="game">Game name:</label>
             <textarea
               id="game"
@@ -127,12 +136,15 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
               rows={1}
               value={formData.game}
               onChange={handleChange}
+              maxLength={50}
               required
               aria-required="true"
               autoFocus
             ></textarea>
-          </div>
-          <div className={styles["post-entry"]}>
+            <small style={{ color: '#666', fontSize: '0.8rem' }}>
+              {formData.game.length}/50 characters
+            </small>
+          </div>          <div className={styles["post-entry"]}>
             <label htmlFor="description">Description:</label>
             <textarea
               id="description"
@@ -141,9 +153,13 @@ function CreatePost({ isOpen, onClose, onSubmit }: CreatePostProps) {
               value={formData.description}
               onChange={handleChange}
               placeholder="Enter your message here"
+              maxLength={200}
               required
               aria-required="true"
             ></textarea>
+            <small style={{ color: formData.description.length > 180 ? '#ff6b6b' : '#666', fontSize: '0.8rem' }}>
+              {formData.description.length}/200 characters
+            </small>
           </div>
           <div className={styles["post-entry"]}>
             <label htmlFor="startDate">Start Date:</label>
